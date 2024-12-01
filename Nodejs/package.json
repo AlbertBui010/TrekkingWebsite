@@ -1,12 +1,15 @@
 {
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
     "express": "^5.0.0-alpha.8",
     "mysql2": "^3.6.0",
-    "sequelize": "^6.37.3"
+    "nodemailer": "^6.9.16",
+    "sequelize": "^6.37.3",
+    "uuid": "^11.0.3"
   },
   "name": "nodejs",
   "version": "1.0.0",
