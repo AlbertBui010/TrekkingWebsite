@@ -7,6 +7,8 @@ let router = express.Router();
 
 let initWebRoutes = (app) => {
 	// API
+	router.get('/', userController.helloWorld); // test
+
 	router.post('/api/login', userController.handleLogin);
 	router.get('/api/get-all-user', userController.getAllUser);
 	router.post('/api/create-new-user', userController.handleCreateNewUser);
@@ -21,6 +23,10 @@ let initWebRoutes = (app) => {
 	router.get('/api/get-all-tour', tourController.handleGetAllTour);
 	router.post('/api/delete-tour', tourController.handleDeleteTour);
 	router.put('/api/update-tour', tourController.handleUpdateTour);
+
+	router.get('/api/get-all-activity-type', tourController.handleGetAllActivityType);
+
+	router.post('/api/order-booking-tour', userController.handleOrderBooking);
 
 	return app.use('/', router);
 };

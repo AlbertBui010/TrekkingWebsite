@@ -1,4 +1,5 @@
 import db from '../models';
+const moment = require('moment-timezone');
 
 let createNewTourServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
@@ -27,6 +28,7 @@ let createNewTourServices = async (data) => {
 			const requiredField = [
 				'tourName',
 				'outdoorActivityTypeId',
+				'tourDescription',
 				'image',
 				'guideId',
 				'best_month',
@@ -64,7 +66,11 @@ let createNewTourServices = async (data) => {
 					errMessage: 'Tour already existed',
 				});
 			} else {
-				const newTour = await db.Tour.create(data);
+				const vietnamTime = moment.utc().tz('Asia/Ho_Chi_Minh').toDate();
+				const newTour = await db.Tour.create({
+					...data,
+					createdAt: vietnamTime,
+				});
 				resolve({
 					errCode: 0,
 					data: newTour,
@@ -81,6 +87,7 @@ let updateTourServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const requiredField = [
+				'id',
 				'tourName',
 				'outdoorActivityTypeId',
 				'image',
@@ -97,7 +104,6 @@ let updateTourServices = async (data) => {
 				'activity_duration',
 				'schedule_detail',
 				'price',
-				'id',
 			];
 
 			const missingField = requiredField.find((field) => !data[field]);
@@ -124,17 +130,18 @@ let updateTourServices = async (data) => {
 				});
 			}
 		} catch (e) {
+			console.log(e);
 			reject(e);
 		}
 	});
 };
 
-let deleteTourServices = async (data) => {
+let deleteTourServices = async (tourId) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			if (data && data.id) {
+			if (tourId !== null) {
 				let res = await db.Tour.destroy({
-					where: { id: data.id },
+					where: { id: tourId },
 				});
 
 				if (res) {
@@ -144,7 +151,7 @@ let deleteTourServices = async (data) => {
 					});
 				} else {
 					resolve({
-						errCode: 0,
+						errCode: 2,
 						errMessage: 'Delete tour failed!',
 					});
 				}
@@ -160,18 +167,38 @@ let deleteTourServices = async (data) => {
 	});
 };
 
-let getAllTourServices = async (data) => {
+let getAllTourServices = async (id) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let tours;
-			if (data && data.id === 'ALL') {
+			if (id === 'ALL') {
 				tours = await db.Tour.findAll({
-					raw: true,
+					include: [
+						{
+							model: db.OutdoorActivityType,
+							as: 'activityType',
+						},
+						{
+							model: db.Guide,
+							as: 'guide', // Alias defined in the association
+							attributes: ['id', 'fullName', 'expertGuideDescription', 'phoneNumber', 'image'], // Select fields
+						},
+					],
 				});
-			} else if (data && data.id) {
+			} else {
 				tours = await db.Tour.findOne({
-					where: { id: data.id },
-					raw: true,
+					where: { id: id },
+					include: [
+						{
+							model: db.OutdoorActivityType,
+							as: 'activityType',
+						},
+						{
+							model: db.Guide,
+							as: 'guide',
+							attributes: ['id', 'fullName', 'expertGuideDescription', 'phoneNumber', 'image'],
+						},
+					],
 				});
 			}
 
@@ -180,6 +207,38 @@ let getAllTourServices = async (data) => {
 				data: tours ? tours : [],
 			});
 		} catch (e) {
+			console.log('ERROR:', e);
+			reject(e);
+		}
+	});
+};
+
+let getAllActivityTypeServices = async (id) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let types = {};
+			if (id === 'ALL') {
+				types = await db.OutdoorActivityType.findAll({
+					include: {
+						model: db.Tour,
+						as: 'tours',
+					},
+				});
+			} else {
+				types = await db.OutdoorActivityType.findOne({
+					where: { id: id },
+					include: {
+						model: db.Tour,
+						as: 'tours',
+					},
+				});
+			}
+			resolve({
+				errCode: 0,
+				type: types ? types : [],
+			});
+		} catch (e) {
+			console.log('ERROR:', e);
 			reject(e);
 		}
 	});
@@ -189,4 +248,5 @@ module.exports = {
 	updateTourServices,
 	deleteTourServices,
 	getAllTourServices,
+	getAllActivityTypeServices,
 };

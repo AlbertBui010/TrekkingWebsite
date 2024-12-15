@@ -13,6 +13,9 @@ module.exports = {
 			tourName: {
 				type: Sequelize.STRING,
 			},
+			tourDescription: {
+				type: Sequelize.STRING,
+			},
 			outdoorActivityTypeId: {
 				type: Sequelize.INTEGER,
 			},

@@ -38,7 +38,7 @@ let handleDeleteGuide = async (req, res) => {
 
 let handleGetAllGuide = async (req, res) => {
 	try {
-		let data = await guideServices.getAllGuideServices(req.body);
+		let data = await guideServices.getAllGuideServices(req.query);
 		return res.status(200).json(data);
 	} catch (e) {
 		return res.status(500).json({

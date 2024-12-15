@@ -9,6 +9,16 @@ module.exports = (sequelize, DataTypes) => {
 		 */
 		static associate(models) {
 			// define association here
+			this.belongsTo(models.OutdoorActivityType, {
+				foreignKey: 'outdoorActivityTypeId',
+				as: 'activityType', // Alias for the association
+			});
+
+			// A Tour belongs to a Guide
+			this.belongsTo(models.Guide, {
+				foreignKey: 'guideId',
+				as: 'guide', // Alias for the association
+			});
 		}
 	}
 	Tour.init(
@@ -16,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
 			tourName: DataTypes.STRING,
 			outdoorActivityTypeId: DataTypes.INTEGER,
 			image: DataTypes.STRING,
+			tourDescription: DataTypes.STRING,
 
 			guideId: DataTypes.INTEGER,
 			// tour summary

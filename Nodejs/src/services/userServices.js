@@ -1,7 +1,7 @@
 import db from '../models/index';
 import bcrypt from 'bcrypt';
+import { fileLoader } from 'ejs';
 const salt = bcrypt.genSaltSync(10);
-import { v4 as uuidv4 } from 'uuid';
 
 let handleLoginService = async (email, password) => {
 	return new Promise(async (resolve, reject) => {
@@ -11,12 +11,12 @@ let handleLoginService = async (email, password) => {
 				where: { email: email },
 				raw: true,
 			});
+
 			if (user) {
 				if (bcrypt.compareSync(password, user.password)) {
 					data.errCode = 0;
 					data.errMessage = 'OK';
 					delete user.password; // delete password from user object before sending to client
-					console.log('Albert check user after dele pass:', user);
 					data.user = user;
 				} else {
 					data.errCode = 2;
@@ -26,6 +26,7 @@ let handleLoginService = async (email, password) => {
 				data.errCode = 1;
 				data.errMessage = 'User not found!';
 			}
+
 			resolve(data);
 		} catch (e) {
 			reject(e);
@@ -60,6 +61,14 @@ let getAllUserService = async (userId) => {
 let handleCreateNewUserService = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
+			const requiredField = ['fullName', 'email', 'password', 'phoneNumber', 'gender'];
+			const missingField = requiredField.find((field) => !data[field]);
+			if (missingField) {
+				resolve({
+					errCode: 2,
+					errMessage: 'Missing input parameters!',
+				});
+			}
 			let user = await db.User.findOne({
 				where: { email: data.email },
 			});
@@ -84,7 +93,7 @@ let handleCreateNewUserService = async (data) => {
 					fullName: data.fullName,
 					phoneNumber: data.phoneNumber,
 					gender: data.gender, // Nam, Nữ, Khác
-					role: role, // Khách
+					role: role, // Khách default
 					image: image,
 				});
 				resolve({
@@ -107,8 +116,27 @@ let handleUpdateUserService = async (data) => {
 	});
 };
 
+let handleOrderBookingService = async (data) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			if (data.ticket_count > 0) {
+				let res = await db.Booking.insert({
+					userId: data.userId,
+					tourId: data.tourId,
+					number_of_tickets: data.ticket_count,
+				});
+				resolve(res);
+				console.log(res);
+			}
+		} catch (e) {
+			resolve(e);
+		}
+	});
+};
 module.exports = {
 	getAllUserService: getAllUserService,
 	handleLoginService: handleLoginService,
 	handleCreateNewUserService: handleCreateNewUserService,
+	handleOrderBookingService,
+	handleOrderBookingService,
 };

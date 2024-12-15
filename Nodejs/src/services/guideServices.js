@@ -101,10 +101,13 @@ let getAllGuideServices = async (data) => {
 		try {
 			let guides;
 			if (data && data.id === 'ALL') {
-				guides = await db.Guide.findAll();
+				guides = await db.Guide.findAll({
+					raw: true,
+				});
 			} else {
 				guides = await db.Guide.findOne({
 					where: { id: data.id },
+					raw: true,
 				});
 			}
 

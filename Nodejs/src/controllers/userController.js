@@ -5,6 +5,20 @@
 // handle edit user
 import userServices from '../services/userServices';
 
+let helloWorld = async (req, res) => {
+	try {
+		return res.status(200).json({
+			errCode: 0,
+			errMessage: 'HELLO WORLD FROM SERVER',
+		});
+	} catch (e) {
+		return res.status(500).json({
+			errCode: -1,
+			errMessage: 'Internal Server Error',
+		});
+	}
+};
+
 let handleLogin = async (req, res) => {
 	try {
 		let email = req.body.email;
@@ -12,7 +26,7 @@ let handleLogin = async (req, res) => {
 
 		if (!email || !password) {
 			return res.status(200).json({
-				errCode: 1,
+				errCode: 3,
 				errMessage: 'Missing inputs parameter!',
 			});
 		}
@@ -76,9 +90,23 @@ let handleUpdateUser = async (req, res) => {
 	}
 };
 
+let handleOrderBooking = async (req, res) => {
+	try {
+		let data = await userServices.handleOrderBookingService(req.body);
+		return res.status(200).json(data);
+	} catch (e) {
+		console.error('Error Order Booking:', e);
+		return res.status(500).json({
+			errCode: -1,
+			errMessage: 'Internal server error',
+		});
+	}
+};
 module.exports = {
+	helloWorld,
 	getAllUser: getAllUser,
 	handleLogin: handleLogin,
 	handleCreateNewUser: handleCreateNewUser,
 	handleUpdateUser: handleUpdateUser,
+	handleOrderBooking: handleOrderBooking,
 };
