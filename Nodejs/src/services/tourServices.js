@@ -22,6 +22,8 @@ let createTourServices = async (data) => {
 				'activity_duration',
 				'schedule_detail',
 				'price',
+				'status', // Available , Ongoing, Finished
+				'activationState', // hide / show
 			];
 
 			const missingField = requiredFields.find((field) => !data[field]);
@@ -32,7 +34,6 @@ let createTourServices = async (data) => {
 				});
 			}
 
-			// Kiểm tra tour đã tồn tại chưa
 			const existingTour = await db.Tour.findOne({
 				where: {
 					tourName: data.tourName,
@@ -47,21 +48,14 @@ let createTourServices = async (data) => {
 				});
 			}
 
-			// Tạo tour mới
-			const newTour = await db.Tour.create({
-				...data,
-				status: 'Open',
-				hidden: false,
-			});
+			const newTour = await db.Tour.create(data);
 
-			// Trả về kết quả thành công
 			resolve({
 				errCode: 0,
 				data: newTour,
 				errMessage: 'Tour created successfully!',
 			});
 		} catch (error) {
-			// Xử lý lỗi
 			reject({
 				errCode: -1,
 				errMessage: 'Error from server!',
@@ -94,10 +88,9 @@ let updateTourServices = async (data) => {
 				'schedule_detail',
 				'price',
 				'status',
-				'hidden',
+				'activationState',
 			];
 
-			// Kiểm tra trường bị thiếu
 			const missingField = requiredFields.find((field) => !data[field]);
 			if (missingField) {
 				return resolve({
@@ -106,7 +99,6 @@ let updateTourServices = async (data) => {
 				});
 			}
 
-			// Cập nhật tour trong cơ sở dữ liệu
 			const [updatedCount] = await db.Tour.update(data, {
 				where: { id: data.id },
 			});
@@ -123,7 +115,6 @@ let updateTourServices = async (data) => {
 				});
 			}
 		} catch (error) {
-			// Xử lý lỗi từ server
 			console.error(error);
 			reject({
 				errCode: -1,
@@ -138,7 +129,6 @@ let updateTourServices = async (data) => {
 let deleteTourServices = async (tourId) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			// Kiểm tra xem tourId có hợp lệ không
 			if (!tourId) {
 				return resolve({
 					errCode: 1,
@@ -146,12 +136,10 @@ let deleteTourServices = async (tourId) => {
 				});
 			}
 
-			// Xóa tour khỏi cơ sở dữ liệu
 			const deletedCount = await db.Tour.destroy({
 				where: { id: tourId },
 			});
 
-			// Kiểm tra kết quả xóa
 			if (deletedCount > 0) {
 				resolve({
 					errCode: 0,
@@ -164,7 +152,6 @@ let deleteTourServices = async (tourId) => {
 				});
 			}
 		} catch (e) {
-			// Xử lý lỗi từ server
 			console.error(e);
 			reject({
 				errCode: -1,
@@ -175,17 +162,16 @@ let deleteTourServices = async (tourId) => {
 	});
 };
 
-// GET ALL GUIDE
+// GET ALL
 let getAllTourServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let tours;
 
-			// Nếu id là 'ALL', lấy tất cả các tour
-			if (data.id === 'ALL') {
-				const whereClause = {}; // Điều kiện mặc định
-				if (data.hidden !== undefined) {
-					whereClause.hidden = data.hidden; // Lọc theo trạng thái ẩn
+			if (data && data.id === 'ALL') {
+				const whereClause = {};
+				if (data.activationState !== undefined) {
+					whereClause.activationState = data.activationState;
 				}
 
 				tours = await db.Tour.findAll({
@@ -201,9 +187,7 @@ let getAllTourServices = async (data) => {
 						},
 					],
 				});
-			}
-			// Nếu có id cụ thể, lấy tour theo id
-			else if (data.id) {
+			} else if (data && data.id) {
 				tours = await db.Tour.findOne({
 					where: { id: data.id },
 					include: [
@@ -217,9 +201,7 @@ let getAllTourServices = async (data) => {
 						},
 					],
 				});
-			}
-			// Nếu không có điều kiện id hoặc missing parameters
-			else {
+			} else {
 				resolve({
 					errCode: 1,
 					errMessage: 'Missing required parameters!',
@@ -227,7 +209,6 @@ let getAllTourServices = async (data) => {
 				return;
 			}
 
-			// Trả về kết quả
 			resolve({
 				errCode: 0,
 				data: tours || [],

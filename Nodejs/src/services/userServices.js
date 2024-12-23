@@ -151,35 +151,44 @@ const handleUpdateUserServices = (data) => {
 	});
 };
 
-// LOGIN
-let handleLoginServices = (email, password) => {
+let handleLoginServices = (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let data = {};
+			if (!data.email || !data.password) {
+				return resolve({
+					errCode: 2,
+					errMessage: 'Missing required parameters!',
+				});
+			}
+
+			let res = {};
+
 			let user = await db.User.findOne({
-				where: { email: email },
+				where: { email: data.email },
 				raw: true,
 			});
 
 			if (user) {
-				if (bcrypt.compareSync(password, user.password) && !user.activationState) {
-					data.errCode = 0;
-					data.errMessage = 'OK';
+				if (bcrypt.compareSync(data.password, user.password) && user.activationState) {
+					res.errCode = 0;
+					res.errMessage = 'OK';
+
 					delete user.password;
-					data.user = user;
-					resolve(data);
+					res.user = user;
+					resolve(res);
 				} else {
-					data.errCode = 2;
-					data.errMessage = 'Wrong password or account is activationState!';
-					resolve(data);
+					res.errCode = 2;
+					res.errMessage = 'Incorrect password or the account is not activated.';
+					resolve(res);
 				}
 			} else {
-				data.errCode = 1;
-				data.errMessage = 'User not found!';
-				resolve(data);
+				res.errCode = 1;
+				res.errMessage = 'User not found!';
+				resolve(res);
 			}
 		} catch (e) {
-			reject(e); // Xử lý lỗi nếu có
+			console.error('Error logging in:', e);
+			reject(e);
 		}
 	});
 };

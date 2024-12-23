@@ -104,6 +104,7 @@ const Register = () => {
 							type="email"
 							placeholder="Email"
 							name="email"
+							required
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							className="w-full py-3 my-4 bg-transparent text-black border-b border-black outline-none focus:outline-none"

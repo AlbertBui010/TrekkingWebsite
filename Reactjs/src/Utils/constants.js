@@ -7,7 +7,7 @@ export const customPath = {
 	PAYMENT_PAGE: '/payment/:slug/:index',
 	// admin (/admin/)
 	ADMIN_MANAGE_TOURS: 'manage-tours',
-	USER_INFO: '/user-info',
+	USER_INFO: 'user/user-info',
 	CREATE_TOUR: 'create-tour',
 
 	//<Route path="/tour/:slug/:tourId" element={<DetailsPage />} />

@@ -57,24 +57,32 @@ const SignatureTour = () => {
 				{/* Tour Cards */}
 				<div className="hidden md:grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 					{activeItem?.tours?.length > 0 ? (
-						activeItem?.tours.map((tour, index) => (
-							<Link
-								to={`/tour/${tour.tourName}/${tour.id}`}
-								key={index}
-								className="bg-white shadow-md rounded-xl group transform transition duration-300 hover:-translate-y-3 hover:shadow-2xl cursor-pointer"
-							>
-								<img src={tour.image} alt={tour.tourName} className="w-full h-[400px] object-cover" />
-								<div className="p-4">
-									<h3 className="text-2xl font-semibold text-gray-800 group-hover:text-lime-700 transition">
-										{tour.tourName}
-									</h3>
-									<p className="text-gray-600 text-x mt-2">{tour.tourDescription}</p>
-									<p className="text-black text-xl font-bold mt-[20px] group-hover:text-red-800">
-										{tour.price}
-									</p>
-								</div>
-							</Link>
-						))
+						activeItem?.tours.map((tour, index) => {
+							const images = tour?.image ? tour.image.split(',') : [];
+							return (
+								<Link
+									to={`/tour/${tour.tourName}/${tour.id}`}
+									key={index}
+									className="bg-white shadow-md rounded-xl group transform transition duration-300 hover:-translate-y-3 hover:shadow-2xl cursor-pointer"
+								>
+									<img
+										src={images.length > 0 ? images[0] : ''}
+										alt={tour.tourName}
+										className="w-full h-[400px] object-cover"
+									/>
+
+									<div className="p-4">
+										<h3 className="text-2xl font-semibold text-gray-800 group-hover:text-lime-700 transition">
+											{tour.tourName}
+										</h3>
+										<p className="text-gray-600 text-x mt-2">{tour.tourDescription}</p>
+										<p className="text-black text-xl font-bold mt-[20px] group-hover:text-red-800">
+											{tour.price} VNĐ
+										</p>
+									</div>
+								</Link>
+							);
+						})
 					) : (
 						<p className="text-center text-gray-500">Không có tour nào được tìm thấy.</p>
 					)}

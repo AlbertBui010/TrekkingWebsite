@@ -19,7 +19,6 @@ const AdminManageTours = () => {
 				setTours(data);
 				setFilteredTours(data);
 				console.log('GUIDE', filteredTours);
-				// Lấy danh sách loại hình hoạt động từ dữ liệu
 				const uniqueActivityTypes = [...new Set(data.map((tour) => tour?.activityType?.name))];
 				setActivityTypes(uniqueActivityTypes.map((type) => ({ value: type, label: type })));
 			} catch (error) {
@@ -121,35 +120,44 @@ const AdminManageTours = () => {
 			{/* Danh sách tour */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{filteredTours &&
-					filteredTours?.map((tour) => (
-						<div key={tour.id} className="border border-gray-300 p-4 rounded shadow-md">
-							<h2 className="text-xl font-semibold mb-2">{tour.tourName}</h2>
-							<p className="text-sm text-gray-500 mb-2">Loại hình: {tour?.activityType?.name}</p>
-							<p className="text-sm text-gray-500 mb-2">Guide: {tour?.guide?.fullName}</p>
-							{/* <p className="text-sm text-gray-500 mb-2">
-								Ngày tạo: {new Date(tour.createdAt).toLocaleDateString()}
-							</p> */}
-							<p className="text-sm text-gray-500 mb-2">Ngày khởi hành: {tour?.pickup_time}</p>
-							<p className="text-sm text-gray-500 mb-2">
-								Số khách: {tour?.current_number_guest} / {tour?.max_guests}
-							</p>
+					filteredTours?.map((tour) => {
+						const images = tour?.image ? tour.image.split(',') : [];
 
-							<div className="flex justify-between items-center mt-4">
-								<button
-									className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-									onClick={() => handleEditOrCreate(tour)}
-								>
-									Sửa
-								</button>
-								<button
-									className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-									onClick={() => handleDeleteTour(tour.id)}
-								>
-									Xóa
-								</button>
+						return (
+							<div
+								key={tour.id}
+								className="border border-gray-300 p-4 rounded shadow-md bg-cover bg-center"
+								style={{
+									backgroundImage: images.length > 0 ? `url(${images[0]})` : 'none',
+								}}
+							>
+								<div className="bg-white bg-opacity-80 p-4 rounded">
+									<h2 className="text-xl font-semibold mb-2">{tour.tourName}</h2>
+									<p className="text-gray-900 mb-2">Loại hình: {tour?.activityType?.name}</p>
+									<p className="text-gray-900 mb-2">Guide: {tour?.guide?.fullName}</p>
+									<p className="text-gray-900 mb-2">Ngày khởi hành: {tour?.pickup_time}</p>
+									<p className="text-gray-900 mb-2">
+										Số khách: {tour?.current_number_guest} / {tour?.max_guests}
+									</p>
+
+									<div className="flex justify-between items-center mt-4">
+										<button
+											className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+											onClick={() => handleEditOrCreate(tour)}
+										>
+											Sửa
+										</button>
+										<button
+											className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+											onClick={() => handleDeleteTour(tour.id)}
+										>
+											Xóa
+										</button>
+									</div>
+								</div>
 							</div>
-						</div>
-					))}
+						);
+					})}
 			</div>
 		</div>
 	);

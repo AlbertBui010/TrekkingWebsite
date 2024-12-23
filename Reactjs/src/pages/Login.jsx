@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { handleLoginService } from '../services/userServices';
+
+import { handleLoginServices } from '../services/userServices';
 import SideImg from '../assets/img/background-login3.jpg';
 
 const Login = () => {
@@ -26,7 +27,6 @@ const Login = () => {
 
 	const getErrorMessage = (errCode) => {
 		const messages = {
-			0: 'Đăng nhập thành công!',
 			1: 'Không tìm thấy người dùng!',
 			2: 'Sai mật khẩu',
 			3: 'Vui lòng nhập đầy đủ thông tin đăng nhập!',
@@ -36,22 +36,23 @@ const Login = () => {
 
 	const handleLogin = async () => {
 		const { email, password } = formData;
+
 		if (!email || !password) {
 			setErrMessage(getErrorMessage(3));
 			return;
 		}
 
 		try {
-			const res = await handleLoginService({ email: email, password });
+			const res = await handleLoginServices({ email: email, password });
 			const data = res?.data;
 
 			if (data?.errCode === 0) {
 				const user = data?.user;
 				localStorage.setItem('user', JSON.stringify(user));
-
-				if (user?.role === 'Admin') {
-					console.log('CHECCKKK');
-					navigate('/admin/dashboard');
+				if (user?.role == 'Admin') {
+					navigate('/admin/manage-tours');
+				} else if (user?.role == 'Khách') {
+					navigate('/user/user-info');
 				} else {
 					navigate('/');
 				}

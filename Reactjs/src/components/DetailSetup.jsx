@@ -1,12 +1,22 @@
 import React from 'react';
 import { FaCheck, FaTimes, FaPlus } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const DetailSetup = ({ price }) => {
 	const navigate = useNavigate();
 	const { slug, tourId } = useParams();
+
 	const handleBooking = () => {
-		navigate(`/payment/${slug}/${tourId}`);
+		const user = JSON.parse(localStorage.getItem('user'));
+		if (user) {
+			navigate(`/payment/${slug}/${tourId}`);
+		} else {
+			toast.info('Vui lòng đăng nhập trước khi dăng ký tour!');
+			setTimeout(() => {
+				navigate('/login');
+			}, 2000);
+		}
 	};
 
 	return (

@@ -7,35 +7,41 @@ import bookingController from '../controllers/bookingController';
 let router = express.Router();
 
 let initWebRoutes = (app) => {
-	// API
+	// REGISTER
+	router.post('/api/register', userController.handleRegister);
+
+	// LOGIN
+	router.post('/api/login', userController.handleLogin);
 
 	// USER
-	// router.post('/api/login', userController.handleLogin);
 	router.get('/api/get-all-user', userController.handleGetAllUser);
 	router.post('/api/create-user', userController.handleCreateUser);
 	router.put('/api/update-user', userController.handleUpdateUser);
 	router.post('/api/delete-user', userController.handleDeleteUser);
 
+	// GUIDE
 	router.get('/api/get-all-guide', guideController.handleGetAllGuide);
 	router.post('/api/create-guide', guideController.handleCreateGuide);
 	router.put('/api/update-guide', guideController.handleUpdateGuide);
 	router.post('/api/delete-guide', guideController.handleDeleteGuide);
 
+	// OUTDOOR_ACTIVITY_TYPE
 	router.post('/api/create-outdoor-activity-type', outdoorActivityTypeController.handleCreateOutdoorActivityType);
 	router.get('/api/get-all-outdoor-activity-type', outdoorActivityTypeController.handleGetAllOutdoorActivityType);
 	router.put('/api/update-outdoor-activity-type', outdoorActivityTypeController.handleUpdateOutdoorActivityType);
 	router.post('/api/delete-outdoor-activity-type', outdoorActivityTypeController.handleDeleteOutdoorActivityType);
 
+	// BOOKING
 	router.post('/api/create-booking', bookingController.handleCreateBooking);
 	router.get('/api/get-all-booking', bookingController.handleGetAllBooking);
 	router.put('/api/update-booking', bookingController.handleUpdateBooking);
 	router.post('/api/delete-booking', bookingController.handleDeleteBooking);
 
-	// router.post('/api/create-new-tour', tourController.handleCreateNewTour);
-	// router.get('/api/get-all-tour', tourController.handleGetAllTour);
-	// router.post('/api/delete-tour', tourController.handleDeleteTour);
-	// router.put('/api/update-tour', tourController.handleUpdateTour);
-
+	// TOUR
+	router.post('/api/create-tour', tourController.handleCreateTour);
+	router.get('/api/get-all-tour', tourController.handleGetAllTour);
+	router.put('/api/update-tour', tourController.handleUpdateTour);
+	router.post('/api/delete-tour', tourController.handleDeleteTour);
 	return app.use('/', router);
 };
 

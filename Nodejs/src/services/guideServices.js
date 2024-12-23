@@ -120,32 +120,27 @@ let getAllGuideServices = async (data) => {
 			let guides;
 
 			if (data.id === 'ALL') {
-				const whereClause = {}; // Điều kiện mặc định
+				const whereClause = {};
 				if (data.activationState !== undefined) {
-					whereClause.activationState = data.activationState; // Lọc theo trạng thái ẩn
+					whereClause.activationState = data.activationState;
 				}
 
 				guides = await db.Guide.findAll({
 					where: whereClause,
 					// raw: true,
 				});
-			}
-			// Trường hợp: Lấy guide theo `id`
-			else if (data && data.id) {
+			} else if (data && data.id) {
 				guides = await db.Guide.findOne({
 					where: { id: data.id },
 					// raw: true,
 				});
-			}
-			// Trường hợp: Không có tham số hợp lệ
-			else {
+			} else {
 				return resolve({
 					errCode: 1,
 					errMessage: 'Missing required parameters!',
 				});
 			}
 
-			// Trả về kết quả
 			return resolve({
 				errCode: 0,
 				data: guides ? guides : [],

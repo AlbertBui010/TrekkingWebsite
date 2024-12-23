@@ -164,7 +164,7 @@ const CreateTour = () => {
 			alert('Vui lòng chọn ít nhất một ảnh để upload tour!!!');
 			return;
 		}
-
+		console.log(imageLinks.join(''));
 		if (pickupTime === '') {
 			alert('Vui lòng chọn ngày giờ khởi hành!!!');
 			return;
@@ -201,7 +201,7 @@ const CreateTour = () => {
 	};
 
 	const handleRemoveImage = (index) => {
-		const updatedImageLinks = imageLinks.filter((_, i) => i !== index); // Loại bỏ hình ảnh tại vị trí `index`
+		const updatedImageLinks = imageLinks.filter((_, i) => i !== index);
 		setImageLinks(updatedImageLinks);
 	};
 
@@ -326,7 +326,11 @@ const CreateTour = () => {
 								value={newLink}
 								onChange={(e) => setNewLink(e.target.value)}
 							/>
-							<button onClick={handleAddImage} className="mt-2 p-2 bg-blue-500 text-white rounded">
+							<button
+								type="button"
+								onClick={handleAddImage}
+								className="mt-2 p-2 bg-blue-500 text-white rounded"
+							>
 								Thêm ảnh
 							</button>
 							{error && <p className="mt-2 text-sm text-red-500">{error}</p>}
@@ -339,8 +343,8 @@ const CreateTour = () => {
 											alt={`Hình ảnh ${index + 1}`}
 											className="w-32 h-32 object-cover mr-2 mb-2"
 										/>
-										{/* Nút xóa */}
 										<button
+											type="button"
 											onClick={() => handleRemoveImage(index)}
 											className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
 										>
@@ -421,7 +425,7 @@ const CreateTour = () => {
 										id="date"
 										value={date}
 										onChange={handleDateChange}
-										min={new Date().toISOString().split('T')[0]} // Ngày hiện tại
+										min={!tour?.id ? new Date().toISOString().split('T')[0] : undefined}
 										className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 									/>
 								</div>
@@ -440,7 +444,9 @@ const CreateTour = () => {
 										name="time"
 										value={time}
 										onChange={(e) => handleTimeChange(e.target.value)}
-										min={new Date().toTimeString().split(' ')[0].slice(0, 5)} // Giờ hiện tại
+										min={
+											!tour?.id ? new Date().toTimeString().split(' ')[0].slice(0, 5) : undefined
+										} // Giờ hiện tại
 										className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 									/>
 								</div>
@@ -619,7 +625,7 @@ const CreateTour = () => {
 						</div>
 					</div>
 					<button
-						type="submit"
+						type="button"
 						onClick={handleSubmit}
 						className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
 					>

@@ -5,8 +5,9 @@ import NavigationShow from './NavigationShow';
 import MenuMobile from './MenuMobile';
 import { customPath } from '../Utils/constants';
 
-const Header = ({ user }) => {
+const Header = () => {
 	const navigate = useNavigate();
+	const [user, setUser] = useState(null);
 	const [showCategory, setShowCategory] = useState(null);
 	const [showSearch, setShowSearch] = useState(false);
 	const [menuMobileOpen, setMenuMobileOpen] = useState(false);
@@ -14,28 +15,25 @@ const Header = ({ user }) => {
 	const handleMouseEnter = (category) => {
 		setShowCategory(category);
 	};
-
 	const handleMouseLeave = () => {
 		setShowCategory(null);
 	};
-
 	const toggleSearch = () => {
 		setShowSearch(!showSearch);
 	};
-
 	const closeSearch = () => {
 		setShowSearch(false);
 	};
-
 	const toggleMobileMenu = () => {
 		setMenuMobileOpen(!menuMobileOpen);
 	};
 
 	const handleNavigation = () => {
 		if (user) {
-			if (user.role === 'Admin') {
+			if (user.role == 'Admin') {
+				console.log('flag', user);
 				navigate('/admin/' + customPath.ADMIN_MANAGE_TOURS);
-			} else if (user.role === 'Khách') {
+			} else if (user.role == 'Khách') {
 				navigate('/' + customPath.USER_INFO);
 			} else {
 				navigate(customPath.HOMEPAGE);
@@ -45,6 +43,17 @@ const Header = ({ user }) => {
 		}
 	};
 
+	useEffect(() => {
+		const user = JSON.parse(localStorage.getItem('user'));
+		if (user) setUser(user);
+	}, []);
+
+	const handleLogOut = () => {
+		localStorage.removeItem('user');
+		setUser(null);
+		navigate('/login');
+	};
+
 	return (
 		<div className="relative h-[100px] bg-green-950 w-full flex p-4">
 			<div className="container mx-auto flex justify-between items-center">
@@ -52,6 +61,12 @@ const Header = ({ user }) => {
 					Q&T <span className="text-green-500">Trekking</span>
 				</Link>
 				<nav className="hidden md:flex items-center space-x-12 font-semibold p-4 text-white text-lg">
+					<Link
+						to="/"
+						className="flex items-center space-x-1 transform transition duration-300 hover:-translate-x-2 hover:text-lime-600"
+					>
+						Home
+					</Link>
 					<a
 						href="#"
 						className="flex items-center space-x-1 transform transition duration-300 hover:-translate-x-2 hover:text-lime-600"
@@ -73,12 +88,7 @@ const Header = ({ user }) => {
 					>
 						Trekking
 					</a>
-					<Link
-						to="/"
-						className="flex items-center space-x-1 transform transition duration-300 hover:-translate-x-2 hover:text-lime-600"
-					>
-						Home
-					</Link>
+
 					<Link
 						to="/about"
 						className="flex items-center space-x-1 transform transition duration-300 hover:-translate-x-2 hover:text-lime-600"
@@ -121,8 +131,21 @@ const Header = ({ user }) => {
 						className="flex items-center space-x-1 transform transition duration-300 hover:-translate-x-2 hover:text-lime-600 cursor-pointer"
 						onClick={handleNavigation}
 					>
-						{user?.fullName || 'Login'}
+						{/* {user?.fullName || 'Login'} */}
+						{user?.image ? (
+							<img src={user.image} alt={user?.fullName} className="w-8 h-8 rounded-full object-cover" />
+						) : (
+							<span>{user?.fullName || 'Login'}</span>
+						)}
 					</div>
+					{user && (
+						<div
+							onClick={handleLogOut}
+							className="hidden md:flex items-center space-x-1 transform transition duration-300 hover:-translate-x-2 hover:text-lime-600 cursor-pointer"
+						>
+							Logout
+						</div>
+					)}
 				</div>
 			</div>
 			<div
