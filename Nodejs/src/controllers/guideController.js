@@ -47,6 +47,7 @@ let handleGetAllGuide = async (req, res) => {
 		});
 	}
 };
+
 module.exports = {
 	handleCreateGuide,
 	handleUpdateGuide,

@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
 			userId: DataTypes.INTEGER,
 			tourId: DataTypes.INTEGER,
 			number_of_tickets: DataTypes.INTEGER,
+			total_price: DataTypes.BIGINT,
+			status: DataTypes.STRING, // ('register','confirm', 'cancel')
+			activationState: DataTypes.STRING, // hide / show
 		},
 		{
 			sequelize,

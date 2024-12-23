@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
 	OutdoorActivityType.init(
 		{
 			name: DataTypes.STRING,
-			typeDescription: DataTypes.STRING,
+			typeDescription: DataTypes.TEXT,
+			activationState: DataTypes.STRING,
 		},
 		{
 			sequelize,

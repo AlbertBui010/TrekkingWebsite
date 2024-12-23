@@ -3,7 +3,7 @@ import tourServices from '../services/tourServices';
 // add
 let handleCreateNewTour = async (req, res) => {
 	try {
-		let data = await tourServices.createNewTourServices(req.body);
+		let data = await tourServices.createTourServices(req.body);
 		return res.status(200).json(data);
 	} catch (e) {
 		return res.status(500).json({

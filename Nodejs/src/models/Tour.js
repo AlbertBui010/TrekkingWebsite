@@ -1,5 +1,5 @@
 'use strict';
-const { Model } = require('sequelize');
+const { Model, DECIMAL } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
 	class Tour extends Model {
 		/**
@@ -25,8 +25,8 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			tourName: DataTypes.STRING,
 			outdoorActivityTypeId: DataTypes.INTEGER,
-			image: DataTypes.STRING,
-			tourDescription: DataTypes.STRING,
+			image: DataTypes.TEXT,
+			tourDescription: DataTypes.TEXT,
 
 			guideId: DataTypes.INTEGER,
 			// tour summary
@@ -44,7 +44,9 @@ module.exports = (sequelize, DataTypes) => {
 			activity_duration: DataTypes.STRING,
 
 			schedule_detail: DataTypes.TEXT, // markdown
-			price: DataTypes.STRING,
+			price: DataTypes.BIGINT,
+			status: DataTypes.STRING, // Available , Ongoing, Finished
+			activationState: DataTypes.STRING, // hide / show
 		},
 		{
 			sequelize,

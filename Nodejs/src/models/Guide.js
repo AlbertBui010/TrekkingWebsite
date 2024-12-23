@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
 			expertGuideDescription: DataTypes.STRING,
 			image: DataTypes.STRING,
 			phoneNumber: DataTypes.STRING,
+			activationState: DataTypes.STRING, // hide / show
 		},
 		{
 			sequelize,

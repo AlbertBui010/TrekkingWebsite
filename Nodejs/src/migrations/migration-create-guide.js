@@ -23,6 +23,9 @@ module.exports = {
 				allowNull: false,
 				type: Sequelize.STRING,
 			},
+			activationState: {
+				type: Sequelize.STRING, // hide / show
+			},
 			createdAt: {
 				allowNull: false,
 				type: Sequelize.DATE,

@@ -14,7 +14,10 @@ module.exports = {
 				type: Sequelize.STRING,
 			},
 			typeDescription: {
-				type: Sequelize.STRING,
+				type: Sequelize.TEXT,
+			},
+			activationState: {
+				type: Sequelize.STRING, // hide / show
 			},
 			createdAt: {
 				allowNull: false,

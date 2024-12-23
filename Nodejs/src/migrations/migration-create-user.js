@@ -29,6 +29,9 @@ module.exports = {
 				type: Sequelize.STRING, // Admin, Khách
 			},
 			image: {
+				type: Sequelize.TEXT,
+			},
+			activationState: {
 				type: Sequelize.STRING,
 			},
 			createdAt: {

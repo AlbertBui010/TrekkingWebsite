@@ -14,13 +14,13 @@ module.exports = {
 				type: Sequelize.STRING,
 			},
 			tourDescription: {
-				type: Sequelize.STRING,
+				type: Sequelize.TEXT,
 			},
 			outdoorActivityTypeId: {
 				type: Sequelize.INTEGER,
 			},
 			image: {
-				type: Sequelize.STRING,
+				type: Sequelize.TEXT,
 			},
 			guideId: {
 				type: Sequelize.INTEGER,
@@ -62,7 +62,13 @@ module.exports = {
 				type: Sequelize.TEXT,
 			},
 			price: {
-				type: Sequelize.STRING,
+				type: Sequelize.BIGINT,
+			},
+			status: {
+				type: Sequelize.STRING, // Available , Ongoing, Finished
+			},
+			activationState: {
+				type: Sequelize.STRING, // hide / show
 			},
 			createdAt: {
 				allowNull: false,

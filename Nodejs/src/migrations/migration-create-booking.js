@@ -19,6 +19,15 @@ module.exports = {
 			number_of_tickets: {
 				type: Sequelize.INTEGER,
 			},
+			total_price: {
+				type: Sequelize.BIGINT,
+			},
+			status: {
+				type: Sequelize.STRING, // ('register','confirm', 'cancel')
+			},
+			activationState: {
+				type: Sequelize.STRING, // hide / show
+			},
 			createdAt: {
 				allowNull: false,
 				type: Sequelize.DATE,

@@ -1,31 +1,10 @@
 import db from '../models';
-const moment = require('moment-timezone');
 
-let createNewTourServices = async (data) => {
+// CREATE TOUR
+let createTourServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			// tourName: DataTypes.STRING,
-			// outdoorActivityTypeId: DataTypes.INTEGER,
-			// image: DataTypes.STRING,
-
-			// guideId: DataTypes.INTEGER,
-			// // tour summary
-			// best_month: DataTypes.STRING,
-			// max_guests: DataTypes.INTEGER,
-			// current_number_guest: DataTypes.INTEGER,
-			// pickup_time: DataTypes.STRING,
-			// pickup_location: DataTypes.STRING,
-			// group_assembly_area: DataTypes.STRING,
-			// conquest_duration: DataTypes.STRING,
-
-			// medical_access_time: DataTypes.STRING,
-			// distance: DataTypes.STRING,
-			// peak_altitude: DataTypes.STRING,
-			// activity_duration: DataTypes.STRING,
-
-			// schedule_detail: DataTypes.TEXT, // markdown
-			// price: DataTypes.STRING,
-			const requiredField = [
+			const requiredFields = [
 				'tourName',
 				'outdoorActivityTypeId',
 				'tourDescription',
@@ -45,48 +24,58 @@ let createNewTourServices = async (data) => {
 				'price',
 			];
 
-			const missingField = requiredField.find((field) => !data[field]);
+			const missingField = requiredFields.find((field) => !data[field]);
 			if (missingField) {
-				resolve({
+				return resolve({
 					errCode: 1,
-					errMessage: 'Missing parameters!',
+					errMessage: `Missing parameter: ${missingField}`,
 				});
 			}
 
-			let tour = await db.Tour.findOne({
+			// Kiểm tra tour đã tồn tại chưa
+			const existingTour = await db.Tour.findOne({
 				where: {
 					tourName: data.tourName,
 					pickup_time: data.pickup_time,
 				},
 			});
 
-			if (tour) {
-				resolve({
+			if (existingTour) {
+				return resolve({
 					errCode: 2,
-					errMessage: 'Tour already existed',
-				});
-			} else {
-				const vietnamTime = moment.utc().tz('Asia/Ho_Chi_Minh').toDate();
-				const newTour = await db.Tour.create({
-					...data,
-					createdAt: vietnamTime,
-				});
-				resolve({
-					errCode: 0,
-					data: newTour,
-					errMessage: 'Create tour successfully',
+					errMessage: 'Tour already exists!',
 				});
 			}
-		} catch (e) {
-			reject(e);
+
+			// Tạo tour mới
+			const newTour = await db.Tour.create({
+				...data,
+				status: 'Open',
+				hidden: false,
+			});
+
+			// Trả về kết quả thành công
+			resolve({
+				errCode: 0,
+				data: newTour,
+				errMessage: 'Tour created successfully!',
+			});
+		} catch (error) {
+			// Xử lý lỗi
+			reject({
+				errCode: -1,
+				errMessage: 'Error from server!',
+				error: error.message,
+			});
 		}
 	});
 };
 
+// UPDATE TOUR
 let updateTourServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const requiredField = [
+			const requiredFields = [
 				'id',
 				'tourName',
 				'outdoorActivityTypeId',
@@ -104,90 +93,103 @@ let updateTourServices = async (data) => {
 				'activity_duration',
 				'schedule_detail',
 				'price',
+				'status',
+				'hidden',
 			];
 
-			const missingField = requiredField.find((field) => !data[field]);
+			// Kiểm tra trường bị thiếu
+			const missingField = requiredFields.find((field) => !data[field]);
 			if (missingField) {
-				resolve({
+				return resolve({
 					errCode: 1,
-					errMessage: 'Missing parameters!',
+					errMessage: `Missing parameter: ${missingField}`,
 				});
 			}
 
-			let result = await db.Tour.update(data, {
+			// Cập nhật tour trong cơ sở dữ liệu
+			const [updatedCount] = await db.Tour.update(data, {
 				where: { id: data.id },
 			});
 
-			if (result == 1) {
-				resolve({
+			if (updatedCount === 1) {
+				return resolve({
 					errCode: 0,
-					errMessage: 'Update tour successfully',
+					errMessage: 'Tour updated successfully',
 				});
 			} else {
-				resolve({
-					errCode: 0,
-					errMessage: 'Update tour failed',
+				return resolve({
+					errCode: 2,
+					errMessage: 'Tour update failed or no changes detected',
 				});
 			}
-		} catch (e) {
-			console.log(e);
-			reject(e);
+		} catch (error) {
+			// Xử lý lỗi từ server
+			console.error(error);
+			reject({
+				errCode: -1,
+				errMessage: 'Error from server!',
+				error: error.message,
+			});
 		}
 	});
 };
 
+// DELETE TOUR
 let deleteTourServices = async (tourId) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			if (tourId !== null) {
-				let res = await db.Tour.destroy({
-					where: { id: tourId },
-				});
-
-				if (res) {
-					resolve({
-						errCode: 0,
-						errMessage: 'Delete tour successfully!',
-					});
-				} else {
-					resolve({
-						errCode: 2,
-						errMessage: 'Delete tour failed!',
-					});
-				}
-			} else {
-				resolve({
+			// Kiểm tra xem tourId có hợp lệ không
+			if (!tourId) {
+				return resolve({
 					errCode: 1,
 					errMessage: 'Missing parameters!',
 				});
 			}
+
+			// Xóa tour khỏi cơ sở dữ liệu
+			const deletedCount = await db.Tour.destroy({
+				where: { id: tourId },
+			});
+
+			// Kiểm tra kết quả xóa
+			if (deletedCount > 0) {
+				resolve({
+					errCode: 0,
+					errMessage: 'Delete tour successfully!',
+				});
+			} else {
+				resolve({
+					errCode: 2,
+					errMessage: 'Delete tour failed or tour not found!',
+				});
+			}
 		} catch (e) {
-			reject(e);
+			// Xử lý lỗi từ server
+			console.error(e);
+			reject({
+				errCode: -1,
+				errMessage: 'Error from server!',
+				error: e.message,
+			});
 		}
 	});
 };
 
-let getAllTourServices = async (id) => {
+// GET ALL GUIDE
+let getAllTourServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let tours;
-			if (id === 'ALL') {
+
+			// Nếu id là 'ALL', lấy tất cả các tour
+			if (data.id === 'ALL') {
+				const whereClause = {}; // Điều kiện mặc định
+				if (data.hidden !== undefined) {
+					whereClause.hidden = data.hidden; // Lọc theo trạng thái ẩn
+				}
+
 				tours = await db.Tour.findAll({
-					include: [
-						{
-							model: db.OutdoorActivityType,
-							as: 'activityType',
-						},
-						{
-							model: db.Guide,
-							as: 'guide', // Alias defined in the association
-							attributes: ['id', 'fullName', 'expertGuideDescription', 'phoneNumber', 'image'], // Select fields
-						},
-					],
-				});
-			} else {
-				tours = await db.Tour.findOne({
-					where: { id: id },
+					where: whereClause,
 					include: [
 						{
 							model: db.OutdoorActivityType,
@@ -196,57 +198,54 @@ let getAllTourServices = async (id) => {
 						{
 							model: db.Guide,
 							as: 'guide',
-							attributes: ['id', 'fullName', 'expertGuideDescription', 'phoneNumber', 'image'],
 						},
 					],
 				});
 			}
-
-			resolve({
-				errCode: 0,
-				data: tours ? tours : [],
-			});
-		} catch (e) {
-			console.log('ERROR:', e);
-			reject(e);
-		}
-	});
-};
-
-let getAllActivityTypeServices = async (id) => {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let types = {};
-			if (id === 'ALL') {
-				types = await db.OutdoorActivityType.findAll({
-					include: {
-						model: db.Tour,
-						as: 'tours',
-					},
-				});
-			} else {
-				types = await db.OutdoorActivityType.findOne({
-					where: { id: id },
-					include: {
-						model: db.Tour,
-						as: 'tours',
-					},
+			// Nếu có id cụ thể, lấy tour theo id
+			else if (data.id) {
+				tours = await db.Tour.findOne({
+					where: { id: data.id },
+					include: [
+						{
+							model: db.OutdoorActivityType,
+							as: 'activityType',
+						},
+						{
+							model: db.Guide,
+							as: 'guide',
+						},
+					],
 				});
 			}
+			// Nếu không có điều kiện id hoặc missing parameters
+			else {
+				resolve({
+					errCode: 1,
+					errMessage: 'Missing required parameters!',
+				});
+				return;
+			}
+
+			// Trả về kết quả
 			resolve({
 				errCode: 0,
-				type: types ? types : [],
+				data: tours || [],
 			});
 		} catch (e) {
 			console.log('ERROR:', e);
-			reject(e);
+			reject({
+				errCode: -1,
+				errMessage: 'An error occurred while fetching tours!',
+				error: e.message,
+			});
 		}
 	});
 };
+
 module.exports = {
-	createNewTourServices,
+	createTourServices,
 	updateTourServices,
 	deleteTourServices,
 	getAllTourServices,
-	getAllActivityTypeServices,
 };
