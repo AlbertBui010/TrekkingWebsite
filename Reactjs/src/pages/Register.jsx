@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import Side_Img from '../assets/img/background-login3.jpg';
-import { data, useNavigate } from 'react-router-dom';
-import { handleRegisterService } from '../services/userServices';
+import { useNavigate } from 'react-router-dom';
+import { handleRegisterServices } from '../services/userServices';
 
 const Register = () => {
 	const navigate = useNavigate();
-	const [fullName, setFullname] = useState('');
-	const [email, setEmail] = useState('');
-	const [phoneNumber, setPhoneNumber] = useState('');
-	const [password, setPassword] = useState('');
-	const [gender, setGender] = useState('');
+	const [formData, setFormData] = useState({
+		fullName: '',
+		email: '',
+		phoneNumber: '',
+		password: '',
+		gender: '',
+	});
 	const [errMessage, setErrMessage] = useState('');
 
 	const getErrorMessage = (errCode) => {
@@ -26,6 +28,7 @@ const Register = () => {
 	};
 
 	const validateFields = () => {
+		const { fullName, email, password, phoneNumber, gender } = formData;
 		if (!fullName || !email || !password || !phoneNumber || !gender) {
 			setErrMessage('Vui lòng điền đầy đủ thông tin đăng ký!');
 			return false;
@@ -39,33 +42,30 @@ const Register = () => {
 		}
 
 		try {
-			let res = await handleRegisterService({
-				fullName,
-				email,
-				phoneNumber,
-				password,
-				gender,
-			});
+			const res = await handleRegisterServices(formData);
+			const data = res?.data;
+			const message = getErrorMessage(data.errCode);
+			setErrMessage(message);
 
-			if (res) {
-				let data = res?.data;
-				const message = getErrorMessage(data.errCode);
-				setErrMessage(message);
-
-				if (data.errCode === 0) {
-					navigate('/login', {
-						state: {
-							email,
-							password,
-						},
-					});
-				}
-			} else {
-				setErrMessage('Đã xảy ra lỗi khi đăng ký, vui lòng thử lại!');
+			if (data.errCode === 0) {
+				navigate('/login', {
+					state: {
+						email: formData.email,
+						password: formData.password,
+					},
+				});
 			}
 		} catch (e) {
 			setErrMessage('Đã xảy ra lỗi từ phía máy chủ, vui lòng thử lại!');
 		}
+	};
+
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setFormData((prevData) => ({
+			...prevData,
+			[name]: value,
+		}));
 	};
 
 	return (
@@ -96,8 +96,8 @@ const Register = () => {
 							type="text"
 							placeholder="Họ và tên"
 							name="fullName"
-							value={fullName}
-							onChange={(e) => setFullname(e.target.value)}
+							value={formData.fullName}
+							onChange={handleChange}
 							className="w-full py-3 my-4 bg-transparent text-black border-b border-black outline-none focus:outline-none"
 						/>
 						<input
@@ -105,33 +105,33 @@ const Register = () => {
 							placeholder="Email"
 							name="email"
 							required
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
+							value={formData.email}
+							onChange={handleChange}
 							className="w-full py-3 my-4 bg-transparent text-black border-b border-black outline-none focus:outline-none"
 						/>
 						<input
 							type="text"
 							placeholder="Số điện thoại"
 							name="phoneNumber"
-							value={phoneNumber}
-							onChange={(e) => setPhoneNumber(e.target.value)}
+							value={formData.phoneNumber}
+							onChange={handleChange}
 							className="w-full py-3 my-4 bg-transparent text-black border-b border-black outline-none focus:outline-none"
 						/>
 						<input
 							type="password"
 							placeholder="Mật khẩu"
 							name="password"
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
+							value={formData.password}
+							onChange={handleChange}
 							className="w-full py-3 my-4 bg-transparent text-black border-b border-black outline-none focus:outline-none"
 						/>
 						<select
 							name="gender"
-							defaultValue="Choose"
-							onChange={(e) => setGender(e.target.value)}
+							value={formData.gender}
+							onChange={handleChange}
 							className="w-full py-3 my-4 bg-transparent text-black border-b border-black outline-none focus:outline-none"
 						>
-							<option value="Choose" disabled hidden>
+							<option value="" disabled hidden>
 								Chọn giới tính
 							</option>
 							<option value="Nam">Nam</option>

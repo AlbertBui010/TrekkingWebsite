@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
 		{
 			name: DataTypes.STRING,
 			typeDescription: DataTypes.TEXT,
-			activationState: DataTypes.STRING,
+			activationState: DataTypes.STRING, // Show (default) / Hide
 		},
 		{
 			sequelize,

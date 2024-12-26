@@ -8,7 +8,7 @@ let router = express.Router();
 
 let initWebRoutes = (app) => {
 	// REGISTER
-	router.post('/api/register', userController.handleRegister);
+	router.post('/api/register', userController.handleCreateUser);
 
 	// LOGIN
 	router.post('/api/login', userController.handleLogin);
@@ -36,12 +36,14 @@ let initWebRoutes = (app) => {
 	router.get('/api/get-all-booking', bookingController.handleGetAllBooking);
 	router.put('/api/update-booking', bookingController.handleUpdateBooking);
 	router.post('/api/delete-booking', bookingController.handleDeleteBooking);
+	router.get('/api/get-all-booking-by-user-id', bookingController.handleGetAllBookingByUserId);
 
 	// TOUR
 	router.post('/api/create-tour', tourController.handleCreateTour);
 	router.get('/api/get-all-tour', tourController.handleGetAllTour);
 	router.put('/api/update-tour', tourController.handleUpdateTour);
 	router.post('/api/delete-tour', tourController.handleDeleteTour);
+
 	return app.use('/', router);
 };
 

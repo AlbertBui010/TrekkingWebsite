@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { handleGetAllActivityType } from '../services/adminServices';
+import { handleGetAllOutdoorActivityTypeServices } from '../services/adminServices';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -14,12 +14,12 @@ const SignatureTour = () => {
 	useEffect(() => {
 		const fetchTypes = async () => {
 			try {
-				const response = await handleGetAllActivityType('ALL');
+				const response = await handleGetAllOutdoorActivityTypeServices({ id: 'ALL', activationState: 'Show' });
 				if (response?.data?.errCode === 0) {
-					const fetchedTypes = response?.data?.type || [];
-					setTypes(fetchedTypes);
-					if (fetchedTypes.length > 0) {
-						setActiveItem(fetchedTypes[0]);
+					const activityTypes = response?.data?.data || [];
+					setTypes(activityTypes);
+					if (activityTypes.length > 0) {
+						setActiveItem(activityTypes[0]);
 					}
 				}
 			} catch (err) {
@@ -29,6 +29,10 @@ const SignatureTour = () => {
 
 		fetchTypes();
 	}, []);
+
+	const formatCurrency = (value) => {
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+	};
 
 	return (
 		<section className="py-12 bg-white z-0 mb-[50px]">
@@ -40,23 +44,26 @@ const SignatureTour = () => {
 				{/* Filter Buttons */}
 				<div className="w-full h-[80px] md:h-[50px] flex flex-row mb-[50px] text-lg md:text-xl font-semibold rounded-xl overflow-hidden">
 					<div className="w-full h-full flex justify-between">
-						{types.map((type, index) => (
-							<button
-								onClick={() => setActiveItem(type)}
-								key={index}
-								className={`text-black w-1/3 transition duration-300 hover:bg-lime-700 hover:text-white ${
-									activeItem?.name === type.name ? 'bg-lime-900 text-white' : 'bg-gray-100 text-black'
-								}`}
-							>
-								{type.name}
-							</button>
-						))}
+						{types &&
+							types.map((type, index) => (
+								<button
+									onClick={() => setActiveItem(type)}
+									key={index}
+									className={`text-black w-1/3 transition duration-300 hover:bg-lime-700 hover:text-white ${
+										activeItem?.name === type.name
+											? 'bg-lime-900 text-white'
+											: 'bg-gray-100 text-black'
+									}`}
+								>
+									{type.name}
+								</button>
+							))}
 					</div>
 				</div>
 
 				{/* Tour Cards */}
 				<div className="hidden md:grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-					{activeItem?.tours?.length > 0 ? (
+					{activeItem && activeItem?.tours.length > 0 ? (
 						activeItem?.tours.map((tour, index) => {
 							const images = tour?.image ? tour.image.split(',') : [];
 							return (
@@ -77,14 +84,14 @@ const SignatureTour = () => {
 										</h3>
 										<p className="text-gray-600 text-x mt-2">{tour.tourDescription}</p>
 										<p className="text-black text-xl font-bold mt-[20px] group-hover:text-red-800">
-											{tour.price} VNĐ
+											{formatCurrency(tour.price)}
 										</p>
 									</div>
 								</Link>
 							);
 						})
 					) : (
-						<p className="text-center text-gray-500">Không có tour nào được tìm thấy.</p>
+						<p className="text-center text-gray-500">Hiện tại chưa có tour.</p>
 					)}
 				</div>
 
@@ -101,29 +108,30 @@ const SignatureTour = () => {
 						}}
 						className="" // Chỉ hiển thị trên mobile
 					>
-						{activeItem?.tours.map((tour, index) => (
-							<SwiperSlide key={index}>
-								<Link
-									to={`/tour/${tour.tourName}/${tour.id}`}
-									className="bg-white shadow-md rounded-xl group transform transition duration-300 hover:-translate-y-3 hover:shadow-2xl cursor-pointer"
-								>
-									<img
-										src={tour.image}
-										alt={tour.tourName}
-										className="w-full h-[300px] object-cover"
-									/>
-									<div className="p-4">
-										<h3 className="text-xl font-semibold text-gray-800 group-hover:text-lime-700 transition h-12 md:h-0">
-											{tour.tourName}
-										</h3>
-										<p className="text-gray-600 text-sm mt-2 h-32  ">{tour.tourDescription}</p>
-										<p className="text-black text-lg font-bold mt-[20px] group-hover:text-red-800 mb-4 ">
-											{tour.price}
-										</p>
-									</div>
-								</Link>
-							</SwiperSlide>
-						))}
+						{activeItem &&
+							activeItem?.tours.map((tour, index) => (
+								<SwiperSlide key={index}>
+									<Link
+										to={`/tour/${tour.tourName}/${tour.id}`}
+										className="bg-white shadow-md rounded-xl group transform transition duration-300 hover:-translate-y-3 hover:shadow-2xl cursor-pointer"
+									>
+										<img
+											src={tour.image}
+											alt={tour.tourName}
+											className="w-full h-[300px] object-cover"
+										/>
+										<div className="p-4">
+											<h3 className="text-xl font-semibold text-gray-800 group-hover:text-lime-700 transition h-12 md:h-0">
+												{tour.tourName}
+											</h3>
+											<p className="text-gray-600 text-sm mt-2 h-32  ">{tour.tourDescription}</p>
+											<p className="text-black text-lg font-bold mt-[20px] group-hover:text-red-800 mb-4 ">
+												{tour.price}
+											</p>
+										</div>
+									</Link>
+								</SwiperSlide>
+							))}
 					</Swiper>
 				</div>
 			</div>

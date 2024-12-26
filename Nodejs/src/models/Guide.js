@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
 	Guide.init(
 		{
 			fullName: DataTypes.STRING,
-			expertGuideDescription: DataTypes.STRING,
+			expertGuideDescription: DataTypes.TEXT,
 			image: DataTypes.STRING,
 			phoneNumber: DataTypes.STRING,
 			activationState: DataTypes.STRING, // hide / show

@@ -1,13 +1,9 @@
-const moment = require('moment');
-const momentTimezone = require('moment-timezone');
-const vietnamTime = momentTimezone.utc().tz('Asia/Ho_Chi_Minh').toDate();
-const db = require('../models'); // Giả sử bạn đã cấu hình sequelize models đúng cách
+const db = require('../models');
 
 // CREATE
 let createOutdoorActivityTypeServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			// Kiểm tra tham số bắt buộc
 			const requiredFields = ['name', 'typeDescription', 'activationState'];
 			const missingField = requiredFields.find((field) => !data[field]);
 
@@ -29,7 +25,7 @@ let createOutdoorActivityTypeServices = async (data) => {
 				});
 			}
 
-			await db.OutdoorActivityType.create({
+			let res = await db.OutdoorActivityType.create({
 				name: data.name,
 				typeDescription: data.typeDescription,
 				activationState: data.activationState || 'Show',
@@ -38,6 +34,7 @@ let createOutdoorActivityTypeServices = async (data) => {
 			return resolve({
 				errCode: 0,
 				errMessage: 'Activity type created successfully!',
+				data: res['dataValues'],
 			});
 		} catch (e) {
 			console.log('Error from server:', e);
@@ -53,18 +50,35 @@ let getAllOutdoorActivityTypeServices = async (data) => {
 			let activityTypes;
 
 			if (data.id === 'ALL') {
-				const whereClause = {};
-
-				if (data.activationState !== undefined) {
-					whereClause.activationState = data.activationState;
+				if (data.activationState !== 'undefined') {
+					activityTypes = await db.OutdoorActivityType.findAll({
+						where: { activationState: data.activationState },
+						include: [
+							{
+								model: db.Tour,
+								as: 'tours',
+							},
+						],
+					});
+				} else {
+					activityTypes = await db.OutdoorActivityType.findAll({
+						include: [
+							{
+								model: db.Tour,
+								as: 'tours',
+							},
+						],
+					});
 				}
-
-				activityTypes = await db.OutdoorActivityType.findAll({
-					where: whereClause,
-				});
 			} else if (data && data.id) {
 				activityTypes = await db.OutdoorActivityType.findOne({
 					where: { id: data.id },
+					include: [
+						{
+							model: db.Tour,
+							as: 'tours',
+						},
+					],
 				});
 			} else {
 				return resolve({

@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
-import { handleDeleteTourService, handleGetAllTours } from '../../../services/adminServices';
-
+import { handleDeleteTourService, handleGetAllToursServices } from '../../../services/adminServices';
+import { toast } from 'react-toastify';
+import { handleUpdateTourServices } from '../../../services/adminServices';
+import { activationState } from '../../../Utils/constants';
 const AdminManageTours = () => {
+	const navigate = useNavigate();
 	const [tours, setTours] = useState([]);
 	const [filteredTours, setFilteredTours] = useState([]);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [activityTypes, setActivityTypes] = useState([]);
-	const navigate = useNavigate();
 
 	// Fetch all tours
 	useEffect(() => {
 		const fetchTours = async () => {
 			try {
-				const response = await handleGetAllTours('ALL');
+				const response = await handleGetAllToursServices({ id: 'ALL' });
 				let data = response?.data?.data;
 				setTours(data);
 				setFilteredTours(data);
-				console.log('GUIDE', filteredTours);
 				const uniqueActivityTypes = [...new Set(data.map((tour) => tour?.activityType?.name))];
 				setActivityTypes(uniqueActivityTypes.map((type) => ({ value: type, label: type })));
 			} catch (error) {
@@ -28,7 +29,7 @@ const AdminManageTours = () => {
 		fetchTours();
 	}, []);
 
-	// Xử lý tìm kiếm theo tên
+	// Xử lý tìm kiếm theo tên tour
 	useEffect(() => {
 		if (searchTerm === '') {
 			setFilteredTours(tours);
@@ -46,10 +47,23 @@ const AdminManageTours = () => {
 		}
 	};
 
-	// Sắp xếp theo ngày tạo mới nhất
 	const handleSortByDate = () => {
-		const sortedTours = [...filteredTours].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+		const sortedTours = [...filteredTours].sort((a, b) => {
+			const dateA = new Date(a.pickup_time);
+			const dateB = new Date(b.pickup_time);
+
+			return dateA - dateB;
+		});
+
 		setFilteredTours(sortedTours);
+	};
+
+	const handleSortByActivationState = (state) => {
+		if (state) {
+			setFilteredTours(tours.filter((tour) => tour.activationState === state.value));
+		} else {
+			setFilteredTours(tours);
+		}
 	};
 
 	// Xóa tour
@@ -67,7 +81,6 @@ const AdminManageTours = () => {
 		}
 	};
 
-	// Điều hướng tới trang thêm/sửa tour
 	const handleEditOrCreate = (tour) => {
 		if (tour) {
 			navigate(`/admin/create-tour`, {
@@ -80,6 +93,18 @@ const AdminManageTours = () => {
 		}
 	};
 
+	const onToggleActivation = async (tour) => {
+		try {
+			let activationState = tour.activationState === 'Show' ? 'Hide' : 'Show';
+			let res = await handleUpdateTourServices({ ...tour, activationState });
+			if (res?.data?.errCode === 0) {
+				setTours(tours.map((item) => (item.id === tour.id ? { ...item, activationState } : item)));
+			}
+		} catch (error) {
+			console.error('Error toggling activation:', error);
+			toast.error('Error toggling activation:', e);
+		}
+	};
 	return (
 		<div className="p-6">
 			<h1 className="text-2xl font-bold mb-4 text-center">Quản lý tour</h1>
@@ -97,9 +122,17 @@ const AdminManageTours = () => {
 				{/* Bộ lọc theo loại hình hoạt động */}
 				<Select
 					options={activityTypes || []}
-					placeholder="Lọc theo loại hình hoạt động"
+					placeholder="Loại hình hoạt động"
 					isClearable
 					onChange={handleSortByActivityType}
+				/>
+
+				{/* Bộ lọc theo activationState */}
+				<Select
+					options={activationState || []}
+					placeholder="Trạng thái"
+					isClearable
+					onChange={handleSortByActivationState}
 				/>
 
 				{/* Nút sắp xếp */}
@@ -107,7 +140,7 @@ const AdminManageTours = () => {
 					className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
 					onClick={handleSortByDate}
 				>
-					Ngày tạo mới nhất
+					Ngày khởi hành
 				</button>
 			</div>
 			{/* Nút thêm tour */}
@@ -117,6 +150,7 @@ const AdminManageTours = () => {
 			>
 				Thêm tour mới
 			</button>
+
 			{/* Danh sách tour */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{filteredTours &&
@@ -149,9 +183,9 @@ const AdminManageTours = () => {
 										</button>
 										<button
 											className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-											onClick={() => handleDeleteTour(tour.id)}
+											onClick={() => onToggleActivation(tour)}
 										>
-											Xóa
+											{tour.activationState === 'Show' ? 'Ẩn' : 'Hiện'}
 										</button>
 									</div>
 								</div>

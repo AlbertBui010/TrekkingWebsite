@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { customPath } from '../../Utils/constants';
+import { toast } from 'react-toastify';
+import { NavLink } from 'react-router-dom';
 
 const AdminHeader = () => {
 	const navigate = useNavigate();
@@ -12,10 +14,11 @@ const AdminHeader = () => {
 
 	const handleLogout = () => {
 		localStorage.removeItem('user');
+		toast.success('Đăng xuất thành công!');
 		navigate('/login');
 	};
 	return (
-		<nav className="bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+		<nav className="border-y-2 bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700">
 			<div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
 				{/* Logo */}
 				<Link to="/" className="text-[30px] uppercase font-bold text-lime-700">
@@ -27,10 +30,19 @@ const AdminHeader = () => {
 					<ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
 						<li>
 							<Link
-								to="/"
-								className="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent"
+								to="/admin/information"
+								className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
 							>
-								Home
+								Information
+							</Link>
+						</li>
+
+						<li>
+							<Link
+								to="/admin/statistics"
+								className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+							>
+								Statistics
 							</Link>
 						</li>
 
@@ -46,7 +58,7 @@ const AdminHeader = () => {
 
 						<li>
 							<Link
-								to="/admin/manage-bookings"
+								to="/admin/statistics"
 								className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
 							>
 								Booking
@@ -62,20 +74,20 @@ const AdminHeader = () => {
 						</li>
 						<li>
 							<Link
-								to="/contact"
+								to="/admin/manage-outdoor-activity-type"
 								className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
 							>
-								Contact
+								Activity
 							</Link>
 						</li>
 						<li>
-							<Link
-								// onClick={handleLogout}
+							<div
+								onClick={handleLogout}
 								to="/"
-								className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+								className="cursor-pointer block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
 							>
 								Logout
-							</Link>
+							</div>
 						</li>
 					</ul>
 				</div>

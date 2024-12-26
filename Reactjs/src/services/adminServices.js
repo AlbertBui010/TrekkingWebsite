@@ -1,52 +1,57 @@
 import axios from '../axios';
 
-// tour
-let handleGetAllTours = (data) => {
-	return axios.get(`/get-all-tour?id=${data}`);
-};
+// TOUR
+let handleGetAllToursServices = (data) =>
+	axios.get(`/get-all-tour?id=${data.id}&activationState=${data.activationState}`);
 
-let handleDeleteTourService = (data) => {
-	return axios.post(`/delete-tour`, data);
-};
+let handleDeleteTourService = (data) => axios.post(`/delete-tour`, data);
 
-let handleUpdateTour = (data) => {
-	return axios.put('/update-tour', data);
-};
+let handleUpdateTourServices = (data) => axios.put('/update-tour', data);
 
-let handleCreateTour = (tour) => {
-	return axios.post('/create-new-tour', tour);
-};
+let handleCreateTourServices = (data) => axios.post('/create-tour', data);
 
-// activity type
-let handleGetAllActivityType = (data) => {
-	return axios.get(`/get-all-activity-type?id=${data}`);
-};
+// GUIDE
+let handleCreateGuideService = (guideInfo) => axios.post('/create-guide', guideInfo);
 
-let handleGetAllGuides = (data) => {
-	return axios.get(`/get-all-guide?id=${data}`);
-};
+let handleDeleteGuideService = (guideId) => axios.post('/delete-guide', guideId);
 
-// guide
-let handleCreateGuideService = (guideInfo) => {
-	return axios.post('/create-new-guide', guideInfo);
-};
+let handleUpdateGuideServices = (guide) => axios.put('/update-guide', guide);
 
-let handleDeleteGuideService = (guideId) => {
-	return axios.post('/delete-guide', guideId);
-};
+let handleGetAllGuidesServices = (data) =>
+	axios.get(`/get-all-guide?id=${data.id}&activationState=${data.activationState}`);
 
-let handleUpdateGuideService = (guide) => {
-	return axios.put('/update-guide', guide);
-};
+// Outdoor Activity Type
+let handleCreateOutdoorActivityTypeServices = (data) => axios.post('/create-outdoor-activity-type', data);
+let handleDeleteOutdoorActivityTypeServices = (data) => axios.post('/delete-outdoor-activity-type', data);
+let handleUpdateOutdoorActivityTypeServices = (data) => axios.put('/update-outdoor-activity-type', data);
+let handleGetAllOutdoorActivityTypeServices = (data) =>
+	axios.get(`/get-all-outdoor-activity-type?id=${data.id}&activationState=${data.activationState}`);
+
+// Booking
+let handleGetAllBookingServices = (data) =>
+	axios.get(`/get-all-booking?id=${data.id}&activationState=${data.activationState}`);
+
+// USER
+let handleGetAllUserServices = (data) =>
+	axios.get(`/get-all-user?id=${data.id}&activationState=${data.activationState}`);
 
 export {
-	handleGetAllTours,
-	handleGetAllActivityType,
+	handleGetAllToursServices,
 	handleDeleteTourService,
-	handleUpdateTour,
-	handleGetAllGuides,
-	handleCreateTour,
+	handleUpdateTourServices,
+	handleGetAllGuidesServices,
+	handleCreateTourServices,
 	handleCreateGuideService,
 	handleDeleteGuideService,
-	handleUpdateGuideService,
+	handleUpdateGuideServices,
+	// Activity Type
+	handleCreateOutdoorActivityTypeServices,
+	handleDeleteOutdoorActivityTypeServices,
+	handleUpdateOutdoorActivityTypeServices,
+	handleGetAllOutdoorActivityTypeServices,
+	// Booking
+	handleGetAllBookingServices,
+
+	// User
+	handleGetAllUserServices,
 };

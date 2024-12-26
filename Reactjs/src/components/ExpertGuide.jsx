@@ -5,7 +5,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { Navigation, Pagination } from 'swiper/modules';
 import { experts } from '../constant';
-import { handleGetAllGuides } from '../services/adminServices';
+import { handleGetAllGuidesServices } from '../services/adminServices';
 
 const ExpertGuide = () => {
 	const [experts, setExperts] = useState([]);
@@ -13,7 +13,7 @@ const ExpertGuide = () => {
 	useState(() => {
 		const fetchGuides = async () => {
 			try {
-				const res = await handleGetAllGuides('ALL');
+				const res = await handleGetAllGuidesServices({ id: 'ALL', activationState: 'Show' });
 				if (res?.data?.errCode === 0) {
 					setExperts(res?.data?.data || []);
 				}

@@ -4,7 +4,6 @@ import Select from 'react-select';
 const EditTourModal = ({ tour, guides, onSave, onCancel, onChange }) => {
 	const options = guides;
 	const [selectedOption, setSelectedOptions] = useState([]);
-	// console.log('GUIDES: ', options);
 	const handleOverlayClick = (e) => {
 		if (e.target === e.currentTarget) {
 			onCancel();

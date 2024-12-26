@@ -1,29 +1,26 @@
 import axios from '../axios';
 
-let handleLoginServices = (data) => {
-	return axios.post('/login', data);
-};
+const handleRegisterServices = (data) => axios.post('/register', data);
 
-let handleRegisterService = (data) => {
-	return axios.post('/create-new-user', data);
-};
+const handleLoginServices = (data) => axios.post('/login', data);
 
-let handlegetAllUserServices = (data) => {
-	return axios.get(`/get-all-user?id=${data}`);
-};
+const handleGetAllUserServices = (data) => axios.get(`/get-all-user?id=${data}`);
 
-let handleBookingService = (data) => {
-	return axios.post(`/order-booking-tour`, data);
-};
+const handleUpdateUserServices = (data) => axios.put(`/update-user`, data);
 
-let handleUpdateUserServices = (data) => {
-	return axios.put(`/update-user`, data);
-};
+// BOOKING
+const handleCreateBookingServices = (data) => axios.post('/create-booking', data);
+const handleUpdateBookingServices = (data) => axios.put('/update-booking', data);
+const handleGetAllBookingByUserIdServices = (data) =>
+	axios.get(`/get-all-booking-by-user-id?userId=${data.userId}&activationState=${data.activationState}`);
 
 export {
 	handleLoginServices,
-	handleRegisterService,
-	handlegetAllUserServices,
-	handleBookingService,
+	handleRegisterServices,
+	handleGetAllUserServices,
 	handleUpdateUserServices,
+	// booking
+	handleCreateBookingServices,
+	handleUpdateBookingServices,
+	handleGetAllBookingByUserIdServices,
 };

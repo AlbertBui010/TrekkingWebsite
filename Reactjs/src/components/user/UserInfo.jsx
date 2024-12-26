@@ -4,30 +4,33 @@ import Header from '../Header';
 import { handleUpdateUserServices } from '../../services/userServices';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import ViewBooking from './ViewBooking';
 
-const UserEditForm = () => {
+const UserInfo = () => {
 	const navigate = useNavigate();
 	const [user, setUser] = useState(null);
+	const [dataBooking, setDataBooking] = useState({
+		userId: '',
+		activationState: 'Show',
+	});
 	const [error, setError] = useState('');
 	// image
 	const [newLink, setNewLink] = useState('');
 
 	useEffect(() => {
 		const storedUser = localStorage.getItem('user');
-		g;
 		if (storedUser) {
 			try {
 				const parsedUser = JSON.parse(storedUser);
 				setUser(parsedUser);
+				setDataBooking({ ...dataBooking, userId: parsedUser.id });
 			} catch (error) {
 				console.error('Failed to parse user from localStorage:', error);
 			}
+		} else {
+			navigate('/');
 		}
 	}, []);
-
-	if (!user) {
-		navigate('/');
-	}
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -85,7 +88,6 @@ const UserEditForm = () => {
 	return (
 		<>
 			<Header />
-			{/* <UserViewTour /> */}
 			<div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-4">
 				<h2 className="text-2xl font-semibold text-center mb-6">Chỉnh sửa thông tin</h2>
 				<div className="flex items-center justify-center mb-6">
@@ -110,7 +112,7 @@ const UserEditForm = () => {
 								type="email"
 								id="email"
 								name="email"
-								value={user?.email}
+								value={user?.email || ''}
 								onChange={handleChange}
 								required
 								className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -126,7 +128,7 @@ const UserEditForm = () => {
 								type="text"
 								id="fullName"
 								name="fullName"
-								value={user?.fullName}
+								value={user?.fullName || ''}
 								onChange={handleChange}
 								required
 								className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -141,7 +143,7 @@ const UserEditForm = () => {
 							<select
 								id="gender"
 								name="gender"
-								value={user?.gender}
+								value={user?.gender || 'Nam'}
 								onChange={handleChange}
 								required
 								className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -162,7 +164,7 @@ const UserEditForm = () => {
 								type="text"
 								id="phoneNumber"
 								name="phoneNumber"
-								value={user?.phoneNumber}
+								value={user?.phoneNumber || 0}
 								onChange={handleChange}
 								required
 								className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -180,7 +182,7 @@ const UserEditForm = () => {
 									id="file_input"
 									type="text"
 									placeholder="Nhập URL ảnh"
-									value={newLink}
+									value={newLink || ''}
 									onChange={(e) => setNewLink(e.target.value)}
 								/>
 								<button
@@ -213,8 +215,12 @@ const UserEditForm = () => {
 					</div>
 				</form>
 			</div>
+			<div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-4">
+				<ViewBooking data={dataBooking} />
+				{/* <ViewBooking data={{ userId: user?.id, activationState: 'Show' }} /> */}
+			</div>
 		</>
 	);
 };
 
-export default UserEditForm;
+export default UserInfo;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { handleGetAllGuides, handleGetAllTours } from '../services/adminServices';
+import { handleGetAllGuidesServices, handleGetAllToursServices } from '../services/adminServices';
 
 const DetailExpertGuide = ({ guide }) => {
 	return (

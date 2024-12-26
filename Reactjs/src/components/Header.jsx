@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import NavigationShow from './NavigationShow';
 import MenuMobile from './MenuMobile';
 import { customPath } from '../Utils/constants';
+import { toast } from 'react-toastify';
 
 const Header = () => {
 	const navigate = useNavigate();
@@ -29,16 +30,17 @@ const Header = () => {
 	};
 
 	const handleNavigation = () => {
+		const user = JSON.parse(localStorage.getItem('user'));
 		if (user) {
 			if (user.role == 'Admin') {
-				console.log('flag', user);
-				navigate('/admin/' + customPath.ADMIN_MANAGE_TOURS);
+				navigate('/admin/statistics');
 			} else if (user.role == 'Khách') {
 				navigate('/' + customPath.USER_INFO);
 			} else {
 				navigate(customPath.HOMEPAGE);
 			}
 		} else {
+			setUser(null);
 			navigate(customPath.LOGIN);
 		}
 	};
@@ -51,6 +53,7 @@ const Header = () => {
 	const handleLogOut = () => {
 		localStorage.removeItem('user');
 		setUser(null);
+		toast.success('Đăng xuất thành công!');
 		navigate('/login');
 	};
 
@@ -131,7 +134,6 @@ const Header = () => {
 						className="flex items-center space-x-1 transform transition duration-300 hover:-translate-x-2 hover:text-lime-600 cursor-pointer"
 						onClick={handleNavigation}
 					>
-						{/* {user?.fullName || 'Login'} */}
 						{user?.image ? (
 							<img src={user.image} alt={user?.fullName} className="w-8 h-8 rounded-full object-cover" />
 						) : (

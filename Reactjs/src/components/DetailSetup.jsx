@@ -13,10 +13,14 @@ const DetailSetup = ({ price }) => {
 			navigate(`/payment/${slug}/${tourId}`);
 		} else {
 			toast.info('Vui lòng đăng nhập trước khi dăng ký tour!');
-			setTimeout(() => {
-				navigate('/login');
-			}, 2000);
+			navigate('/login');
+			// setTimeout(() => {
+			// }, 2000);
 		}
+	};
+
+	const formatCurrency = (value) => {
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 	};
 
 	return (
@@ -165,7 +169,9 @@ const DetailSetup = ({ price }) => {
 			<div className="sticky top-4 h-fit bg-gray-100 p-4 shadow-md rounded-lg">
 				<div className="flex flex-col">
 					<h3 className="text-3xl font-bold">GIÁ TỪ:</h3>
-					<p className="text-3xl font-bold text-lime-800 flex items-center justify-end">{price} VNĐ</p>
+					<p className="text-3xl font-bold text-lime-800 flex items-center justify-end">
+						{formatCurrency(price)}
+					</p>
 					<p className="text-xl  flex items-end justify-end text-lime-800">/Khách</p>
 				</div>
 

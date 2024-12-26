@@ -57,49 +57,94 @@ const handleCreateUserServices = (data) => {
 };
 
 // GET ALL USERS
+// let getAllUserServices = (data) => {
+// 	return new Promise(async (resolve, reject) => {
+// 		try {
+// 			let users;
+
+// 			if (data?.id === 'ALL') {
+// 				const whereClause = {};
+
+// 				if (data.activationState !== undefined) {
+// 					whereClause.activationState = data.activationState;
+// 				}
+
+// 				users = await db.User.findAll({
+// 					where: whereClause,
+// 					attributes: {
+// 						exclude: ['password'],
+// 					},
+// 				});
+// 			} else if (data && data.id) {
+// 				users = await db.User.findOne({
+// 					where: { id: data.id },
+// 					attributes: {
+// 						exclude: ['password'],
+// 					},
+// 				});
+// 			} else {
+// 				return resolve({
+// 					errCode: 1,
+// 					errMessage: 'Missing required parameters!',
+// 				});
+// 			}
+
+// 			return resolve({
+// 				errCode: 0,
+// 				data: users ? users : [],
+// 			});
+// 		} catch (e) {
+// 			return reject(e);
+// 		}
+// 	});
+// };
+
 let getAllUserServices = (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let users;
 
-			if (data?.id === 'ALL') {
-				const whereClause = {}; // Điều kiện mặc định
-
-				if (data.activationState !== undefined) {
-					whereClause.activationState = data.activationState; // Lọc theo trạng thái ẩn
+			// Lấy tất cả người dùng
+			if (data.id === 'ALL') {
+				if (data.activationState !== 'undefined') {
+					users = await db.User.findAll({
+						where: { activationState: data.activationState },
+						attributes: { exclude: ['password'] },
+					});
+				} else {
+					users = await db.User.findAll({
+						attributes: { exclude: ['password'] },
+					});
 				}
-
-				users = await db.User.findAll({
-					where: whereClause,
-					attributes: {
-						exclude: ['password'],
-					},
-				});
-			}
-			// Trường hợp: Lấy người dùng theo `id`
-			else if (data && data.id) {
-				users = await db.User.findOne({
-					where: { id: data.id },
-					attributes: {
-						exclude: ['password'],
-					},
-				});
-			}
-			// Trường hợp: Không có tham số hợp lệ
-			else {
+			} else if (data && data.id) {
+				if (data.activationState !== 'undefined') {
+					users = await db.User.findOne({
+						where: { id: data.id, activationState: data.activationState },
+						attributes: { exclude: ['password'] },
+					});
+				} else {
+					users = await db.User.findOne({
+						where: { id: data.id },
+						attributes: { exclude: ['password'] },
+					});
+				}
+			} else {
 				return resolve({
 					errCode: 1,
 					errMessage: 'Missing required parameters!',
 				});
 			}
 
-			// Trả về kết quả
 			return resolve({
 				errCode: 0,
-				data: users ? users : [],
+				data: users || [],
 			});
 		} catch (e) {
-			return reject(e);
+			console.error('Error in getAllUserServices:', e);
+			return reject({
+				errCode: -1,
+				errMessage: 'Server error!',
+			});
 		}
 	});
 };

@@ -3,28 +3,21 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
 	async up(queryInterface, Sequelize) {
-		await queryInterface.createTable('Guides', {
+		await queryInterface.createTable('Informations', {
 			id: {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
 				type: Sequelize.INTEGER,
 			},
-			fullName: {
+			typeInformation: {
 				type: Sequelize.STRING,
 			},
-			expertGuideDescription: {
+			content: {
 				type: Sequelize.TEXT,
 			},
-			image: {
-				type: Sequelize.STRING,
-			},
-			phoneNumber: {
-				allowNull: false,
-				type: Sequelize.STRING,
-			},
 			activationState: {
-				type: Sequelize.STRING, // hide / show
+				type: Sequelize.STRING,
 			},
 			createdAt: {
 				allowNull: false,
@@ -37,6 +30,6 @@ module.exports = {
 		});
 	},
 	async down(queryInterface, Sequelize) {
-		await queryInterface.dropTable('Guides');
+		await queryInterface.dropTable('Informations');
 	},
 };

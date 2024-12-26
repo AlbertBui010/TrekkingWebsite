@@ -5,12 +5,9 @@ export const customPath = {
 	ABOUT_PAGE: '/about',
 	DETAIL_TOUR: '/tour/:slug/:tourId',
 	PAYMENT_PAGE: '/payment/:slug/:index',
-	// admin (/admin/)
 	ADMIN_MANAGE_TOURS: 'manage-tours',
 	USER_INFO: 'user/user-info',
 	CREATE_TOUR: 'create-tour',
-
-	//<Route path="/tour/:slug/:tourId" element={<DetailsPage />} />
 };
 
 export const adminMenu = [
@@ -25,4 +22,9 @@ export const guestMenu = [
 	{ path: '/about', label: 'About Us' },
 	{ path: '/contact', label: 'Contact' },
 	{ path: '/login', label: 'Login' },
+];
+
+export const activationState = [
+	{ value: 'Show', label: 'Hiện' },
+	{ value: 'Hide', label: 'Ẩn' },
 ];

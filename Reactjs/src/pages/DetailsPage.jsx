@@ -4,19 +4,19 @@ import DetailExpertGuide from '../components/DetailExpertGuide';
 import DetailSetup from '../components/DetailSetup';
 import DetailSummary from '../components/DetailSummary';
 import { useParams } from 'react-router-dom';
-import { handleGetAllTours } from '../services/adminServices';
+import { handleGetAllToursServices } from '../services/adminServices';
 
 const DetailsPage = () => {
 	const { tourId } = useParams();
-	const [tourInfo, setTourInfo] = useState({});
+	const [tour, setTour] = useState({});
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchTour = async () => {
 			try {
 				if (tourId) {
-					let res = await handleGetAllTours(tourId);
-					setTourInfo(res?.data?.data);
+					let res = await handleGetAllToursServices({ id: tourId, activationState: 'Show' });
+					setTour(res?.data?.data);
 				}
 			} catch (e) {
 				console.log('ERROR:', e);
@@ -31,16 +31,16 @@ const DetailsPage = () => {
 		return <div className="text-center py-6">Đang tải dữ liệu!</div>;
 	}
 
-	if (!tourInfo) {
+	if (tour.length === 0) {
 		return <div className="text-center py-6">Không tìm thấy thông tin tour!</div>;
 	}
 
 	return (
 		<div>
-			<DetailTour tour={tourInfo} />
-			<DetailExpertGuide guide={tourInfo?.guide} />
-			<DetailSummary tour={tourInfo} />
-			<DetailSetup price={tourInfo?.price} />
+			<DetailTour tour={tour} />
+			<DetailExpertGuide guide={tour?.guide} />
+			<DetailSummary tour={tour} />
+			<DetailSetup price={tour?.price} />
 		</div>
 	);
 };

@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { handleGetAllGuides, handleDeleteGuideService } from '../../../services/adminServices';
+import { handleGetAllGuidesServices, handleUpdateGuideServices } from '../../../services/adminServices';
+import { toast } from 'react-toastify';
+import Select from 'react-select';
+import { activationState } from '../../../Utils/constants';
 
 const ManageGuides = () => {
 	const [guides, setGuides] = useState([]);
 	const [filteredGuides, setFilteredGuides] = useState([]);
 	const [searchTerm, setSearchTerm] = useState('');
-	const [phoneSearchTerm, setPhoneSearchTerm] = useState(''); // New state for phone search
+	const [phoneSearchTerm, setPhoneSearchTerm] = useState('');
 	const navigate = useNavigate();
 
 	// Fetch all guides
 	useEffect(() => {
 		const fetchGuides = async () => {
 			try {
-				const response = await handleGetAllGuides('ALL');
+				const response = await handleGetAllGuidesServices({ id: 'ALL' });
 				let data = response?.data?.data;
 				setGuides(data);
 				setFilteredGuides(data);
@@ -40,17 +43,19 @@ const ManageGuides = () => {
 	}, [searchTerm, phoneSearchTerm, guides]);
 
 	// Handle delete guide
-	const handleDeleteGuide = async (guideId) => {
-		if (window.confirm('Bạn có chắc chắn muốn xóa guide này?')) {
-			try {
-				let res = await handleDeleteGuideService({ id: guideId });
-				if (res?.data?.errCode === 0) {
-					setGuides(guides.filter((guide) => guide.id !== guideId));
-				}
-			} catch (error) {
-				console.error('Error deleting guide:', error);
-				alert('Không thể xóa guide.');
+	const handleToggleDisplayGuide = async (guide) => {
+		try {
+			let activationState = guide.activationState === 'Show' ? 'Hide' : 'Show';
+			let res = await handleUpdateGuideServices({
+				...guide,
+				activationState,
+			});
+			if (res?.data?.errCode === 0) {
+				setGuides(guides.map((item) => (item.id === guide.id ? { ...item, activationState } : item)));
 			}
+		} catch (e) {
+			toast.error('Có lỗi xảy ra khi ẩn/hiện guide');
+			console.error('Error deleting guide:', e);
 		}
 	};
 
@@ -67,6 +72,14 @@ const ManageGuides = () => {
 		}
 	};
 
+	const handleSortByActivationState = (state) => {
+		if (state) {
+			setFilteredGuides(guides.filter((guide) => guide.activationState === state.value));
+		} else {
+			setFilteredGuides(guides);
+		}
+	};
+
 	return (
 		<div className="p-6">
 			<h1 className="text-2xl font-bold mb-4 text-center">Quản lý Guides</h1>
@@ -76,7 +89,7 @@ const ManageGuides = () => {
 				<input
 					type="text"
 					placeholder="Tìm kiếm guide theo tên..."
-					className="border border-gray-300 p-2 rounded w-1/3"
+					className="border border-gray-300 p-2 rounded  w-1/3"
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
 				/>
@@ -84,9 +97,17 @@ const ManageGuides = () => {
 				<input
 					type="text"
 					placeholder="Tìm kiếm theo số điện thoại..."
-					className="border border-gray-300 p-2 rounded w-1/3"
+					className="border border-gray-300 p-2 rounded  w-1/3"
 					value={phoneSearchTerm}
 					onChange={(e) => setPhoneSearchTerm(e.target.value)}
+				/>
+
+				{/* Bộ lọc theo activationState */}
+				<Select
+					options={activationState || []}
+					placeholder="Trạng thái"
+					isClearable
+					onChange={handleSortByActivationState}
 				/>
 			</div>
 
@@ -97,7 +118,6 @@ const ManageGuides = () => {
 			>
 				Thêm guide mới
 			</button>
-
 			{/* List of guides */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 				{filteredGuides &&
@@ -124,9 +144,9 @@ const ManageGuides = () => {
 								</button>
 								<button
 									className="py-2 px-8 ms-2 text-sm font-medium text-white focus:outline-none bg-red-500 rounded-lg border border-gray-200 hover:bg-gray-100 hover:bg-red-600 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-									onClick={() => handleDeleteGuide(guide.id)}
+									onClick={() => handleToggleDisplayGuide(guide)}
 								>
-									Xóa
+									{guide.activationState === 'Show' ? 'Ẩn' : 'Hiện'}
 								</button>
 							</div>
 						</div>

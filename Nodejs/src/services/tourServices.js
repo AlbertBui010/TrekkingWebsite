@@ -48,7 +48,7 @@ let createTourServices = async (data) => {
 				});
 			}
 
-			const newTour = await db.Tour.create(data);
+			const newTour = await db.Tour.create({ ...data, current_number_guest: 0 });
 
 			resolve({
 				errCode: 0,
@@ -168,39 +168,65 @@ let getAllTourServices = async (data) => {
 		try {
 			let tours;
 
-			if (data && data.id === 'ALL') {
-				const whereClause = {};
-				if (data.activationState !== undefined) {
-					whereClause.activationState = data.activationState;
+			if (data.id === 'ALL') {
+				if (data.activationState !== 'undefined') {
+					tours = await db.Tour.findAll({
+						where: { activationState: data.activationState },
+						include: [
+							{
+								model: db.OutdoorActivityType,
+								as: 'activityType',
+							},
+							{
+								model: db.Guide,
+								as: 'guide',
+							},
+						],
+					});
+				} else {
+					tours = await db.Tour.findAll({
+						include: [
+							{
+								model: db.OutdoorActivityType,
+								as: 'activityType',
+							},
+							{
+								model: db.Guide,
+								as: 'guide',
+							},
+						],
+					});
 				}
-
-				tours = await db.Tour.findAll({
-					where: whereClause,
-					include: [
-						{
-							model: db.OutdoorActivityType,
-							as: 'activityType',
-						},
-						{
-							model: db.Guide,
-							as: 'guide',
-						},
-					],
-				});
 			} else if (data && data.id) {
-				tours = await db.Tour.findOne({
-					where: { id: data.id },
-					include: [
-						{
-							model: db.OutdoorActivityType,
-							as: 'activityType',
-						},
-						{
-							model: db.Guide,
-							as: 'guide',
-						},
-					],
-				});
+				if (data.activationState !== 'undefined') {
+					tours = await db.Tour.findOne({
+						where: { id: data.id, activationState: data.activationState },
+						include: [
+							{
+								model: db.OutdoorActivityType,
+								as: 'activityType',
+							},
+							{
+								model: db.Guide,
+								as: 'guide',
+							},
+						],
+					});
+				} else {
+					tours = await db.Tour.findOne({
+						where: { id: data.id },
+						include: [
+							{
+								model: db.OutdoorActivityType,
+								as: 'activityType',
+							},
+							{
+								model: db.Guide,
+								as: 'guide',
+							},
+						],
+					});
+				}
 			} else {
 				resolve({
 					errCode: 1,
@@ -214,12 +240,8 @@ let getAllTourServices = async (data) => {
 				data: tours || [],
 			});
 		} catch (e) {
-			console.log('ERROR:', e);
-			reject({
-				errCode: -1,
-				errMessage: 'An error occurred while fetching tours!',
-				error: e.message,
-			});
+			console.log('Error from server:', e);
+			return reject(e);
 		}
 	});
 };

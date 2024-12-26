@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 
 import { handleLoginServices } from '../services/userServices';
 import SideImg from '../assets/img/background-login3.jpg';
+import { toast } from 'react-toastify';
 
 const Login = () => {
 	const navigate = useNavigate();
@@ -49,9 +50,11 @@ const Login = () => {
 			if (data?.errCode === 0) {
 				const user = data?.user;
 				localStorage.setItem('user', JSON.stringify(user));
-				if (user?.role == 'Admin') {
-					navigate('/admin/manage-tours');
-				} else if (user?.role == 'Khách') {
+				toast.success('Đăng nhập thành công!');
+				if (user?.role === 'Admin') {
+					// navigate('/admin/manage-tours');
+					navigate('/admin/statistics');
+				} else if (user?.role === 'Khách') {
 					navigate('/user/user-info');
 				} else {
 					navigate('/');
@@ -70,7 +73,7 @@ const Login = () => {
 			<div className="relative hidden md:w-1/2 md:flex h-full">
 				<img src={SideImg} alt="Background" className="w-full h-full object-cover" />
 				<div className="absolute top-5 left-0 right-0 flex justify-center">
-					<h1 className="text-[30px] text-amber-900 font-extrabold z-10">Let's Go Trekking With Us</h1>
+					<h1 className="text-[30px] text-amber-900 font-extrabold">Let's Go Trekking With Us</h1>
 				</div>
 			</div>
 

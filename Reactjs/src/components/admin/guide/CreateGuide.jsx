@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { handleCreateGuideService, handleUpdateGuideService } from '../../../services/adminServices';
+import { handleCreateGuideService, handleUpdateGuideServices } from '../../../services/adminServices';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const CreateGuide = () => {
 	const location = useLocation();
@@ -36,7 +37,7 @@ const CreateGuide = () => {
 		e.preventDefault();
 
 		if (!imageLink) {
-			alert('Vui lòng thêm ảnh trước khi gửi!');
+			toast.info('Vui lòng thêm ảnh trước khi gửi!');
 			return;
 		}
 
@@ -47,8 +48,9 @@ const CreateGuide = () => {
 
 		try {
 			if (guideInfo?.id) {
-				let response = await handleUpdateGuideService(guideInfo);
+				let response = await handleUpdateGuideServices(guideInfo);
 				if (response?.data?.errCode === 0) {
+					toast.success('Cập nhật guide thành công!');
 					navigate('/admin/manage-guides');
 				}
 			} else {
@@ -60,12 +62,18 @@ const CreateGuide = () => {
 						image: null,
 						phoneNumber: '',
 					});
+
 					setImageLink('');
 					setNewLink('');
-					alert('Thêm guide thành công!');
+					toast.success('Thêm guide thành công!');
+				} else if (response?.data?.errCode === 1) {
+					toast.error('Số điện thoại guide đã tồn tại!!');
+				} else if (response?.data?.errCode === -1) {
+					toast.error('Đã xảy ra lỗi khi thêm guide!');
 				}
 			}
 		} catch (e) {
+			toast.error('Đã xảy ra lỗi khi thêm guide!');
 			console.log('ERROR', e);
 		}
 	};

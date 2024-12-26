@@ -21,7 +21,7 @@ let createBookingServices = async (data) => {
 				return;
 			}
 
-			await db.Booking.create({
+			let res = await db.Booking.create({
 				userId: data.userId,
 				tourId: data.tourId,
 				number_of_tickets: data.number_of_tickets,
@@ -33,6 +33,7 @@ let createBookingServices = async (data) => {
 			return resolve({
 				errCode: 0,
 				errMessage: 'Create booking successfully',
+				data: res['dataValues'],
 			});
 		} catch (e) {
 			return reject(e);
@@ -44,20 +45,116 @@ let getAllBookingServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let bookings;
+			const userAttributes = { exclude: ['password'] };
 			if (data && data.id === 'ALL') {
-				const whereClause = {};
-				if (data.activationState !== undefined) {
-					whereClause.activationState = data.activationState;
+				if (data.activationState !== 'undefined') {
+					bookings = await db.Booking.findAll({
+						where: { activationState: data.activationState },
+						include: [
+							{
+								model: db.User,
+								as: 'user',
+								attributes: userAttributes,
+							},
+							{
+								model: db.Tour,
+								as: 'tour',
+							},
+						],
+					});
+				} else {
+					bookings = await db.Booking.findAll({
+						include: [
+							{
+								model: db.User,
+								as: 'user',
+								attributes: userAttributes,
+							},
+							{
+								model: db.Tour,
+								as: 'tour',
+							},
+						],
+					});
 				}
-				bookings = await db.Booking.findAll({
-					where: whereClause,
-				});
 			} else if (data && data.id) {
-				bookings = await db.Booking.findOne({
-					where: {
-						id: data.id,
-					},
+				if (data.activationState !== 'undefined') {
+					bookings = await db.Booking.findOne({
+						where: {
+							id: data.id,
+							activationState: data.activationState,
+						},
+						include: [
+							{
+								model: db.User,
+								as: 'user',
+								attributes: userAttributes,
+							},
+							{
+								model: db.Tour,
+								as: 'tour',
+							},
+						],
+					});
+				} else {
+					bookings = await db.Booking.findAll({
+						where: { id: data.id },
+						include: [
+							{
+								model: db.User,
+								as: 'user',
+								attributes: userAttributes,
+							},
+							{
+								model: db.Tour,
+								as: 'tour',
+							},
+						],
+					});
+				}
+			} else {
+				return resolve({
+					errCode: 1,
+					errMessage: 'Missing required parameters!',
 				});
+			}
+
+			return resolve({
+				errCode: 0,
+				data: bookings ? bookings : [],
+			});
+		} catch (e) {
+			return reject(e);
+		}
+	});
+};
+
+let getAllBookingServicesByUserId = async (data) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let bookings;
+			if (data && data.userId) {
+				if (data.activationState !== 'undefined') {
+					bookings = await db.Booking.findAll({
+						where: { userId: data.userId, activationState: data.activationState },
+						include: [
+							{
+								model: db.Tour,
+								as: 'tour',
+							},
+						],
+					});
+				} else {
+					bookings = await db.Booking.findAll({
+						where: { userId: data.userId },
+						include: [
+							{
+								model: db.Tour,
+								as: 'tour',
+							},
+						],
+					});
+				}
 			} else {
 				return resolve({
 					errCode: 1,
@@ -90,7 +187,6 @@ let updateBookingServices = (data) => {
 					id: data.id,
 				},
 			});
-			console.log('booking: ', booking);
 			if (!booking) {
 				return resolve({
 					errCode: 2,
@@ -98,14 +194,7 @@ let updateBookingServices = (data) => {
 				});
 			}
 
-			await booking.update({
-				userId: data.userId || booking.userId,
-				tourId: data.tourId || booking.tourId,
-				number_of_tickets: data.number_of_tickets || booking.number_of_tickets,
-				total_price: data.total_price || booking.total_price,
-				status: data.status || booking.status,
-				activationState: data.activationState || booking.activationState,
-			});
+			await booking.update(data);
 
 			return resolve({
 				errCode: 0,
@@ -156,6 +245,7 @@ let deleteBookingServices = (data) => {
 module.exports = {
 	createBookingServices,
 	getAllBookingServices,
+	getAllBookingServicesByUserId,
 	updateBookingServices,
 	deleteBookingServices,
 };

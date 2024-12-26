@@ -51,4 +51,23 @@ let handleDeleteBooking = async (req, res) => {
 		});
 	}
 };
-module.exports = { handleCreateBooking, handleGetAllBooking, handleUpdateBooking, handleDeleteBooking };
+
+let handleGetAllBookingByUserId = async (req, res) => {
+	try {
+		let data = await bookingServices.getAllBookingServicesByUserId(req.query);
+		return res.status(200).json(data);
+	} catch (e) {
+		console.log('Error:', e);
+		return res.status(500).json({
+			errCode: -1,
+			errMessage: 'Error from server',
+		});
+	}
+};
+module.exports = {
+	handleCreateBooking,
+	handleGetAllBooking,
+	handleUpdateBooking,
+	handleDeleteBooking,
+	handleGetAllBookingByUserId,
+};

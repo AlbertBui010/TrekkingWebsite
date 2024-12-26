@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import PaymentForm from '../components/PaymentForm';
-import { handleGetAllTours } from '../services/adminServices';
+import { handleGetAllToursServices } from '../services/adminServices';
 import Header from '../components/Header';
 
 const PaymentPage = () => {
@@ -11,7 +11,7 @@ const PaymentPage = () => {
 	useEffect(() => {
 		const fetchTour = async () => {
 			try {
-				const res = await handleGetAllTours(index);
+				const res = await handleGetAllToursServices({ id: index, activationState: 'Show' });
 				setTour(res?.data?.data || []);
 			} catch (e) {
 				console.log('ERROR:', e);

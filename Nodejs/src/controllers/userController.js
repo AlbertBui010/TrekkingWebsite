@@ -52,19 +52,6 @@ let handleDeleteUser = async (req, res) => {
 	}
 };
 
-let handleRegister = async (req, res) => {
-	try {
-		let data = await userServices.handleCreateUserServices(req.body);
-		return res.status(200).json(data);
-	} catch (e) {
-		console.error('Error registering:', e);
-		return res.status(500).json({
-			errCode: -1,
-			errMessage: 'Internal server error',
-		});
-	}
-};
-
 let handleLogin = async (req, res) => {
 	try {
 		let data = await userServices.handleLoginServices(req.body);
@@ -84,5 +71,4 @@ module.exports = {
 	handleCreateUser,
 	handleUpdateUser,
 	handleDeleteUser,
-	handleRegister,
 };

@@ -4,7 +4,7 @@ import db from '../models';
 let createGuideServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const requiredField = ['phoneNumber', 'fullName', 'expertGuideDescription', 'image', 'activationState'];
+			const requiredField = ['phoneNumber', 'fullName', 'expertGuideDescription', 'image'];
 			const missingField = requiredField.find((field) => !data[field]);
 			if (missingField) {
 				resolve({
@@ -23,14 +23,14 @@ let createGuideServices = async (data) => {
 					errCode: 1,
 					errMessage: 'Guide already exists',
 				});
-				return;
 			}
+
 			await db.Guide.create({
 				fullName: data.fullName,
 				expertGuideDescription: data.expertGuideDescription,
 				phoneNumber: data.phoneNumber,
 				image: data.image,
-				activationState: data.activationState,
+				activationState: 'Show',
 			});
 
 			resolve({
@@ -51,18 +51,16 @@ let createGuideServices = async (data) => {
 let updateGuideServices = async (data) => {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let [updatedCount] = await db.Guide.update(
-				{
-					fullName: data.fullName,
-					expertGuideDescription: data.expertGuideDescription,
-					image: data.image,
-					phoneNumber: data.phoneNumber,
-					activationState: data.activationState,
-				},
-				{
-					where: { id: data.id },
-				},
-			);
+			const requiredField = ['id', 'phoneNumber', 'fullName', 'expertGuideDescription', 'image'];
+			const missingField = requiredField.find((field) => !data[field]);
+			if (missingField) {
+				return resolve({
+					errCode: 2,
+					errMessage: `Missing parameter: ${missingField}`,
+				});
+			}
+
+			let [updatedCount] = await db.Guide.update(data, { where: { id: data.id } });
 
 			if (updatedCount === 1) {
 				return resolve({
@@ -120,19 +118,16 @@ let getAllGuideServices = async (data) => {
 			let guides;
 
 			if (data.id === 'ALL') {
-				const whereClause = {};
-				if (data.activationState !== undefined) {
-					whereClause.activationState = data.activationState;
+				if (data.activationState !== 'undefined') {
+					guides = await db.Guide.findAll({
+						where: { activationState: data.activationState },
+					});
+				} else {
+					guides = await db.Guide.findAll();
 				}
-
-				guides = await db.Guide.findAll({
-					where: whereClause,
-					// raw: true,
-				});
 			} else if (data && data.id) {
 				guides = await db.Guide.findOne({
 					where: { id: data.id },
-					// raw: true,
 				});
 			} else {
 				return resolve({

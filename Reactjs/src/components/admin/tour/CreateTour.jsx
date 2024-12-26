@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import Select from 'react-select';
 import {
-	handleGetAllGuides,
-	handleGetAllActivityType,
-	handleCreateTour,
-	handleUpdateTour,
+	handleGetAllGuidesServices,
+	handleGetAllOutdoorActivityTypeServices,
+	handleCreateTourServices,
+	handleUpdateTourServices,
 } from '../../../services/adminServices';
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const CreateTour = () => {
 	const location = useLocation();
@@ -16,6 +17,7 @@ const CreateTour = () => {
 	const [guides, setGuides] = useState([]);
 	const [activityTypes, setActivityTypes] = useState([]);
 	const [error, setError] = useState('');
+
 	// image
 	const [imageLinks, setImageLinks] = useState([]);
 	const [newLink, setNewLink] = useState('');
@@ -24,6 +26,13 @@ const CreateTour = () => {
 	const [date, setDate] = useState('');
 	const [time, setTime] = useState('');
 	const [pickupTime, setPickupTime] = useState('');
+
+	// status
+	const statusOptions = [
+		{ value: 'Available', label: 'Available' },
+		{ value: 'Ongoing', label: 'Ongoing' },
+		{ value: 'Finished', label: 'Finished' },
+	];
 
 	const [tour, setTour] = useState({
 		tourName: '',
@@ -43,11 +52,68 @@ const CreateTour = () => {
 		best_month: '',
 		schedule_detail: '',
 		conquest_duration: '',
+		status: 'Available',
+		activationState: 'Show',
 	});
 
+	const handleSubmit = async (event) => {
+		event.preventDefault();
+
+		if (!imageLinks || imageLinks.length === 0) {
+			toast.info('Vui lòng chọn ít nhất một ảnh!');
+			return;
+		}
+
+		if (pickupTime === '') {
+			toast.info('Vui lòng chọn ngày giờ khởi hành!');
+			return;
+		}
+
+		const updatedTour = {
+			...tour,
+			image: imageLinks.join(','),
+			pickup_time: pickupTime,
+		};
+
+		const missingFields = Object.entries(updatedTour).filter(([key, value]) => value === '');
+		if (missingFields.length > 0) {
+			toast.info('Vui lòng điền đầy đủ thông tin!');
+			return;
+		}
+
+		if (updatedTour?.id != null) {
+			// Update existing tour
+			try {
+				let response = await handleUpdateTourServices(updatedTour);
+				if (response?.data?.errCode === 0) {
+					toast.success('Cập nhật tour thành công!');
+					navigate('/admin/manage-tours');
+				} else {
+					toast.error('Cập nhật tour thất bại, vui lòng thử lại!');
+				}
+			} catch (e) {
+				console.log('ERROR', e);
+			}
+		} else {
+			// Create new tour
+			try {
+				let response = await handleCreateTourServices(updatedTour);
+				if (response?.data?.data && response?.data?.errCode === 0) {
+					toast.success('Thêm tour thành công!');
+					clearTourInfo();
+				} else {
+					toast.error('Thêm tour thất bại, vui lòng thử lại!');
+				}
+			} catch (e) {
+				console.log('ERROR:', e);
+			}
+		}
+	};
+	// get tour info from location state
 	useEffect(() => {
 		if (location?.state?.tour) {
 			let tourToUpdate = location.state.tour;
+
 			setTour({
 				id: tourToUpdate.id,
 				tourName: tourToUpdate.tourName,
@@ -67,6 +133,8 @@ const CreateTour = () => {
 				best_month: tourToUpdate.best_month,
 				schedule_detail: tourToUpdate.schedule_detail,
 				conquest_duration: tourToUpdate.conquest_duration,
+				status: tourToUpdate.status,
+				activationState: tourToUpdate.activationState,
 			});
 
 			const existingImages = tourToUpdate?.image ? tourToUpdate.image.split(',') : [];
@@ -79,10 +147,11 @@ const CreateTour = () => {
 		}
 	}, [location]);
 
+	// get all guides
 	useEffect(() => {
 		const fetchGuides = async () => {
 			try {
-				const response = await handleGetAllGuides('ALL');
+				const response = await handleGetAllGuidesServices({ id: 'ALL', activationState: 'Show' });
 				const guidesData = response?.data?.data || [];
 				const formattedGuides = guidesData?.map((guide) => ({
 					value: guide.id,
@@ -96,25 +165,6 @@ const CreateTour = () => {
 
 		fetchGuides();
 	}, []);
-
-	useEffect(() => {
-		const fetchActivityTypes = async () => {
-			try {
-				const response = await handleGetAllActivityType('ALL');
-				const activityTypes = response?.data?.type || [];
-				const formattedActivityTypes = activityTypes.map((type) => ({
-					value: type.id,
-					label: type.name,
-				}));
-				setActivityTypes(formattedActivityTypes);
-			} catch (error) {
-				console.error('Error fetching activity types:', error);
-			}
-		};
-
-		fetchActivityTypes();
-	}, []);
-
 	const handleGuideChange = (selectedOption) => {
 		setTour({
 			...tour,
@@ -122,10 +172,35 @@ const CreateTour = () => {
 		});
 	};
 
-	const handleOutDoorActivityChange = (selectedOption) => {
+	// get all activity types
+	useEffect(() => {
+		const fetchActivityTypes = async () => {
+			try {
+				const response = await handleGetAllOutdoorActivityTypeServices({ id: 'ALL', activationState: 'Show' });
+				const activities = response?.data?.data || [];
+				const formattedActivities = activities.map((type) => ({
+					value: type.id,
+					label: type.name,
+				}));
+				setActivityTypes(formattedActivities);
+			} catch (error) {
+				console.error('Error fetching activity types:', error);
+			}
+		};
+
+		fetchActivityTypes();
+	}, []);
+	const handleOutdoorActivityChange = (selectedOption) => {
 		setTour({
 			...tour,
 			outdoorActivityTypeId: selectedOption.value,
+		});
+	};
+
+	const handleStatusChange = (selectedOption) => {
+		setTour({
+			...tour,
+			status: selectedOption.value,
 		});
 	};
 
@@ -137,6 +212,7 @@ const CreateTour = () => {
 		}));
 	};
 
+	// image
 	const handleAddImage = () => {
 		if (!newLink || !isValidURL(newLink)) {
 			setError('Vui lòng nhập một URL hợp lệ.');
@@ -147,7 +223,6 @@ const CreateTour = () => {
 		setNewLink('');
 		setError('');
 	};
-
 	const isValidURL = (url) => {
 		try {
 			new URL(url);
@@ -156,50 +231,6 @@ const CreateTour = () => {
 			return false;
 		}
 	};
-
-	const handleSubmit = async (event) => {
-		event.preventDefault();
-		// image
-		if (!imageLinks || imageLinks.length === 0) {
-			alert('Vui lòng chọn ít nhất một ảnh để upload tour!!!');
-			return;
-		}
-		console.log(imageLinks.join(''));
-		if (pickupTime === '') {
-			alert('Vui lòng chọn ngày giờ khởi hành!!!');
-			return;
-		}
-
-		const updatedTour = {
-			...tour,
-			image: imageLinks.join(','),
-			pickup_time: pickupTime,
-		};
-
-		if (updatedTour?.id != null) {
-			try {
-				let response = await handleUpdateTour(updatedTour);
-				if (response?.data?.errCode === 0) {
-					navigate('/admin/manage-tours');
-				}
-			} catch (e) {
-				console.log('ERROR', e);
-			}
-		} else {
-			try {
-				let response = await handleCreateTour(updatedTour);
-				if (response?.data?.data && response?.data?.errCode === 0) {
-					alert('Thêm tour thành công.');
-					clearTourInfo();
-				} else {
-					alert('Thêm tour thất bại, vui lòng thử lại!!!');
-				}
-			} catch (e) {
-				console.log('ERROR:', e);
-			}
-		}
-	};
-
 	const handleRemoveImage = (index) => {
 		const updatedImageLinks = imageLinks.filter((_, i) => i !== index);
 		setImageLinks(updatedImageLinks);
@@ -224,27 +255,31 @@ const CreateTour = () => {
 			best_month: '',
 			schedule_detail: '',
 			conquest_duration: '',
+			status: 'Available',
+			activationState: 'Show',
 		});
 
 		setImageLinks([]);
+		setNewLink('');
+		setDate('');
+		setTime('');
+		setPickupTime('');
 	};
 
+	// time
 	const handleDateChange = (e) => {
 		const selectedDate = e.target.value;
 		setDate(selectedDate);
 		updatePickupTime(selectedDate, time);
 	};
-
 	const handleTimeChange = (selectedTime) => {
 		setTime(selectedTime);
 		updatePickupTime(date, selectedTime);
 	};
-
 	const updatePickupTime = (date, time) => {
 		if (date && time) {
 			const formattedPickupTime = `${date} ${time}`;
 			setPickupTime(formattedPickupTime);
-			console.log(formattedPickupTime);
 		}
 	};
 
@@ -304,13 +339,34 @@ const CreateTour = () => {
 							<div>
 								<Select
 									value={activityTypes.find((type) => type.value === tour.outdoorActivityTypeId)}
-									onChange={handleOutDoorActivityChange}
+									onChange={handleOutdoorActivityChange}
 									options={activityTypes}
 									required
 								/>
 							</div>
 						</div>
-
+					</div>
+					<div className="grid md:grid-cols-2 md:gap-6 mt-4">
+						<div className="relative z-0 w-full mb-5 group">
+							<label
+								htmlFor="guideId"
+								className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+							>
+								Show/Hide
+							</label>
+							<div>
+								<select
+									id="activationState"
+									name="activationState"
+									value={tour?.activationState || ''}
+									onChange={handleChange}
+									className="block w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+								>
+									<option value="Show">Show</option>
+									<option value="Hide">Hide</option>
+								</select>
+							</div>
+						</div>
 						<div className="relative z-0 w-full mb-5 group">
 							<label
 								className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -372,23 +428,61 @@ const CreateTour = () => {
 								/>
 							</div>
 						</div>
-						<div className="relative z-0 w-full mb-5 group">
-							<input
-								type="number"
-								name="max_guests"
-								id="max_guests"
-								value={tour?.max_guests || ''}
-								onChange={handleChange}
-								className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-								placeholder=""
-								required
-							/>
+						<div className="relative z-999 w-full mb-5 group">
 							<label
-								htmlFor="max_guests"
-								className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+								htmlFor="status"
+								className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 							>
-								Số khách tối đa
+								Trạng thái
 							</label>
+							<div>
+								<Select
+									value={statusOptions.find((status) => status.value === tour.status)}
+									onChange={handleStatusChange}
+									options={statusOptions}
+									required
+								/>
+							</div>
+						</div>
+					</div>
+					<div className="relative z-0 w-full mb-5 group">
+						<div className="flex items-end gap-4">
+							{/* Input ngày */}
+							<div className="flex-1">
+								<label
+									htmlFor="date"
+									className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+								>
+									Chọn ngày:
+								</label>
+								<input
+									type="date"
+									id="date"
+									value={date}
+									onChange={handleDateChange}
+									min={!tour?.id ? new Date().toISOString().split('T')[0] : undefined}
+									className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+								/>
+							</div>
+
+							{/* Input giờ */}
+							<div className="flex-1">
+								<label
+									htmlFor="time"
+									className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+								>
+									Chọn giờ khởi hành:
+								</label>
+								<input
+									type="time"
+									id="time"
+									name="time"
+									value={time}
+									onChange={(e) => handleTimeChange(e.target.value)}
+									min={!tour?.id ? new Date().toTimeString().split(' ')[0].slice(0, 5) : undefined} // Giờ hiện tại
+									className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+								/>
+							</div>
 						</div>
 					</div>
 					<div className="grid md:grid-cols-2 md:gap-6">
@@ -411,46 +505,22 @@ const CreateTour = () => {
 							</label>
 						</div>
 						<div className="relative z-0 w-full mb-5 group">
-							<div className="flex items-end gap-4">
-								{/* Input ngày */}
-								<div className="flex-1">
-									<label
-										htmlFor="date"
-										className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-									>
-										Chọn ngày:
-									</label>
-									<input
-										type="date"
-										id="date"
-										value={date}
-										onChange={handleDateChange}
-										min={!tour?.id ? new Date().toISOString().split('T')[0] : undefined}
-										className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-									/>
-								</div>
-
-								{/* Input giờ */}
-								<div className="flex-1">
-									<label
-										htmlFor="time"
-										className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-									>
-										Chọn giờ:
-									</label>
-									<input
-										type="time"
-										id="time"
-										name="time"
-										value={time}
-										onChange={(e) => handleTimeChange(e.target.value)}
-										min={
-											!tour?.id ? new Date().toTimeString().split(' ')[0].slice(0, 5) : undefined
-										} // Giờ hiện tại
-										className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-									/>
-								</div>
-							</div>
+							<input
+								type="number"
+								name="max_guests"
+								id="max_guests"
+								value={tour?.max_guests || ''}
+								onChange={handleChange}
+								className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+								placeholder=""
+								required
+							/>
+							<label
+								htmlFor="max_guests"
+								className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+							>
+								Số khách tối đa
+							</label>
 						</div>
 					</div>
 					<div className="grid md:grid-cols-2 md:gap-6">
@@ -487,7 +557,7 @@ const CreateTour = () => {
 								htmlFor="group_assembly_area"
 								className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
 							>
-								Khu vực
+								Khu vực tập kết đoàn
 							</label>
 						</div>
 					</div>
@@ -563,7 +633,7 @@ const CreateTour = () => {
 								htmlFor="activity_duration"
 								className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
 							>
-								Thời gian hoạt động
+								Thời gian hoạt động trong ngày
 							</label>
 						</div>
 					</div>

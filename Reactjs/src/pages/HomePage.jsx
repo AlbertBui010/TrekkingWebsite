@@ -7,8 +7,6 @@ import SaveContainer from '../components/SaveContainer';
 import ExpertGuide from '../components/ExpertGuide';
 import Policy from '../components/Policy';
 
-import { useOutletContext } from 'react-router-dom';
-
 const HomePage = () => {
 	return (
 		<div>
